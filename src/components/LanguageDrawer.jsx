@@ -26,34 +26,34 @@ export function LangTrigger({ className }) {
   const { lang, t } = useI18n();
   const [open, setOpen] = useLangDrawerState();
   return (
-    <>
-      <button
-        onClick={() => setOpen(true)}
-        className={cn(
-          "flex items-center gap-1.5 h-10 px-3 rounded-full border border-pine-800/25 text-pine-800 hover:border-wine-600 hover:text-wine-600 transition-all duration-300 active:scale-90",
-          className
-        )}
-        aria-label={t("lang.ariaOpen")}
-        aria-haspopup="dialog"
-      >
-        <GlobeIcon className="w-4 h-4" />
-        <span className="font-body font-bold text-[12px] tracking-[0.14em]">{lang.toUpperCase()}</span>
-      </button>
-      <LanguageDrawer open={open} onClose={() => setOpen(false)} />
-    </>
+    <button
+      onClick={() => setOpen(true)}
+      className={cn(
+        "flex items-center gap-1.5 h-10 px-3 rounded-full border border-pine-800/25 text-pine-800 hover:border-wine-600 hover:text-wine-600 transition-all duration-300 active:scale-90",
+        className
+      )}
+      aria-label={t("lang.ariaOpen")}
+      aria-haspopup="dialog"
+    >
+      <GlobeIcon className="w-4 h-4" />
+      <span className="font-body font-bold text-[12px] tracking-[0.14em]">{lang.toUpperCase()}</span>
+    </button>
   );
 }
 
-export default function LanguageDrawer({ open, onClose }) {
+export default function LanguageDrawer() {
+  const [open, setOpen] = useLangDrawerState();
   const { lang, setLang, t } = useI18n();
   const { pushToast } = useStore();
+
+  const onClose = () => setOpen(false);
 
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  }, [open]);
 
   const choose = (code) => {
     setLang(code);
@@ -63,44 +63,53 @@ export default function LanguageDrawer({ open, onClose }) {
 
   return (
     <div
-      className={cn("fixed inset-0 z-[88]", open ? "pointer-events-auto" : "pointer-events-none")}
+      className={cn(
+        "fixed inset-0 z-[9999]",
+        open ? "pointer-events-auto" : "pointer-events-none"
+      )}
       aria-hidden={!open}
     >
-      <button
+      {/* Backdrop */}
+      <div
         className={cn(
-          "absolute inset-0 bg-pine-950/70 transition-opacity duration-500 cursor-default",
+          "absolute inset-0 bg-black/60 transition-opacity duration-500 cursor-default",
           open ? "opacity-100" : "opacity-0"
         )}
         onClick={onClose}
-        aria-label={t("lang.drawerAria")}
       />
-      <aside
+      
+      {/* Drawer */}
+      <div
         className={cn(
-          "absolute right-0 top-0 h-full w-full max-w-[330px] bg-pine-950 text-paper-50 shadow-2xl flex flex-col transition-transform duration-500 ease-[cubic-bezier(.22,1,.36,1)] overflow-hidden",
+          "absolute right-0 top-0 h-full w-full max-w-sm bg-pine-950 text-paper-50 shadow-2xl flex flex-col transition-transform duration-500 ease-[cubic-bezier(.22,1,.36,1)] overflow-y-auto",
           open ? "translate-x-0" : "translate-x-full"
         )}
         role="dialog"
         aria-label={t("lang.drawerAria")}
       >
+        {/* Decorative background */}
         <div className="absolute inset-0 olive-branch-bg opacity-30 pointer-events-none" aria-hidden="true" />
 
-        <div className="relative flex items-center justify-between px-6 h-[70px] border-b border-paper-50/12">
+        {/* Header */}
+        <div className="relative z-10 flex items-center justify-between px-6 h-[70px] border-b border-paper-50/12 shrink-0">
           <h2 className="font-display font-bold text-xl flex items-center gap-3">
             <GlobeIcon className="w-5 h-5 text-gold-400" />
             {t("lang.title")}
           </h2>
           <button
             onClick={onClose}
-            className="grid place-items-center w-10 h-10 rounded-full border border-paper-100/25 text-paper-100 hover:bg-paper-50/10 transition-colors active:scale-90"
+            className="grid place-items-center w-10 h-10 rounded-full border border-paper-100/25 text-paper-100 hover:bg-paper-50/10 transition-colors active:scale-90 shrink-0"
             aria-label={t("lang.drawerAria")}
           >
             <CloseIcon className="w-4.5 h-4.5" />
           </button>
         </div>
 
-        <p className="relative px-6 pt-6 text-sm text-paper-100/70">{t("lang.subtitle")}</p>
+        {/* Subtitle */}
+        <p className="relative z-10 px-6 pt-6 text-sm text-paper-100/70">{t("lang.subtitle")}</p>
 
-        <div className="relative px-6 mt-5 space-y-3">
+        {/* Language Options */}
+        <div className="relative z-10 px-6 mt-5 space-y-3 pb-6 flex-1">
           {LANGS.map((l) => {
             const active = lang === l.code;
             return (
@@ -123,13 +132,13 @@ export default function LanguageDrawer({ open, onClose }) {
                 >
                   {l.monogram}
                 </span>
-                <span className="flex-1 min-w-0">
+                <span className="flex-1 min-w-0 text-left">
                   <span className="block font-display font-semibold text-lg leading-tight">{l.native}</span>
                   <span className="block text-xs text-paper-100/55 mt-0.5 tracking-wide uppercase">{l.exo}</span>
                 </span>
                 <span
                   className={cn(
-                    "grid place-items-center w-6 h-6 rounded-full border transition-all duration-300",
+                    "grid place-items-center w-6 h-6 rounded-full border transition-all duration-300 shrink-0",
                     active ? "border-gold-400 bg-gold-500 text-pine-950 scale-100" : "border-paper-50/30 scale-75 opacity-0"
                   )}
                 >
@@ -140,11 +149,12 @@ export default function LanguageDrawer({ open, onClose }) {
           })}
         </div>
 
-        <div className="relative mt-auto px-6 pb-8">
+        {/* Footer */}
+        <div className="relative z-10 px-6 pb-8 mt-auto">
           <OliveBranch className="w-24 h-8 text-gold-500/60 mb-4" />
           <p className="text-xs text-paper-100/50 leading-relaxed">{t("lang.note")}</p>
         </div>
-      </aside>
+      </div>
     </div>
   );
 }

@@ -87,9 +87,13 @@ export default function Books() {
             <span className="ml-auto text-sm text-pine-700/70 tabular-nums">{t("booksPage.titles", { n: filtered.length })}</span>
           </div>
 
-          <div key={filter + lang} className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14">
+          <div key={filter + lang} className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
             {filtered.map((b, i) => (
-              <ProductCard key={b.id} product={b} index={i} />
+              <div key={b.id} className="flex justify-center">
+                <div className="w-full max-w-[320px]">
+                  <ProductCard product={b} index={i} realCover={true} compact={true} />
+                </div>
+              </div>
             ))}
           </div>
         </div>

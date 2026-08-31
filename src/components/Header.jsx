@@ -245,7 +245,7 @@ export default function Header() {
                     >
                       <div className="bg-pine-950 text-paper-100 shadow-2xl shadow-pine-950/40 border border-gold-500/20 p-3">
                         <p className="px-3 pt-2 pb-1 text-[10px] font-bold tracking-[0.3em] uppercase text-gold-400">{t("header.dropTitle")}</p>
-                        {BOOKS.slice(1).map((b) => (
+                        {BOOKS.map((b) => (
                           <Link
                             key={b.id}
                             to={`/books/${b.slug}`}

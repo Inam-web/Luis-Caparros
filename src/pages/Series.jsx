@@ -3,7 +3,7 @@ import { SERIES_ORDER, TRILOGY, formatPrice, externalLinks } from "../data/books
 import { usePageFX, useSEO } from "../hooks/hooks";
 import { useI18n } from "../i18n";
 import { useStore } from "../context/StoreContext";
-import BookCover from "../components/BookCover";
+import RealBookCover from "../components/RealBookCover";
 import { AddToCart, SectionTitle } from "../components/ui";
 import { ArrowRight, BookIcon, CartIcon, OliveBranch } from "../components/Icons";
 
@@ -84,7 +84,7 @@ export default function Series() {
                 style={{ transform: `rotate(${(i - 1) * 4}deg) translateY(${i === 1 ? -14 : 0}px)` }}
                 aria-label={b.title}
               >
-                <BookCover product={b} />
+                <RealBookCover product={b} />
               </Link>
             ))}
           </div>
@@ -97,11 +97,11 @@ export default function Series() {
           <div className="flex flex-wrap items-end justify-between gap-6">
             <SectionTitle eyebrow={t("series.volumes")}>{t("series.standalone")}</SectionTitle>
           </div>
-          <div className="mt-14 grid md:grid-cols-3 gap-x-8 gap-y-14">
+          <div className="mt-14 grid md:grid-cols-3 gap-x-6 gap-y-10">
             {volumes.map((b, i) => (
               <article key={b.id} className="rv group flex flex-col" style={{ transitionDelay: `${i * 80}ms` }}>
                 <Link to={`/books/${b.slug}`} className="block @container max-w-[280px] mx-auto w-full" aria-label={b.title}>
-                  <BookCover product={b} />
+                  <RealBookCover product={b} />
                 </Link>
                 <div className="mt-6 text-center">
                   {orderConfirmed && (

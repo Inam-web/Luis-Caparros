@@ -93,9 +93,13 @@ export default function Store() {
             {t("store.showing", { a: items.length, b: BOOKS.length })}
           </p>
 
-          <div key={sort + lang} className="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-x-7 gap-y-14">
+          <div key={sort + lang} className="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-8">
             {items.map((p, i) => (
-              <ProductCard key={p.id} product={p} index={i} />
+              <div key={p.id} className="flex justify-center">
+                <div className="w-full max-w-[320px]">
+                  <ProductCard product={p} index={i} realCover={true} compact={true} />
+                </div>
+              </div>
             ))}
           </div>
         </div>

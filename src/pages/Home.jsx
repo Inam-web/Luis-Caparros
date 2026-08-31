@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import RealBookCover from "../components/RealBookCover";
 import { BOOKS, HOME_STATS, LATEST, TRILOGY, formatPrice } from "../data/books";
 import { usePageFX, useParallax, useSEO } from "../hooks/hooks";
 import { useLenis } from "../components/Layout";
@@ -94,7 +95,7 @@ export default function Home() {
           <div className="hero-el relative hidden sm:block justify-self-end w-[58%] max-w-[330px] lg:mr-6">
             <div className="floaty [--tilt:0deg]">
               <Link to={`/books/${LATEST.slug}`} aria-label={t("home.latestAria", { title: LATEST.title })} className="block @container">
-                <BookCover product={LATEST} />
+                <RealBookCover product={LATEST} />
               </Link>
             </div>
             <div className="absolute -bottom-5 -left-8 lg:-left-16 bg-paper-50 border border-pine-800/15 shadow-xl shadow-pine-950/15 px-5 py-3.5 rotate-[-3deg]">
@@ -194,7 +195,7 @@ export default function Home() {
       <section id="latest-release" className="relative py-24 lg:py-32 paper-grain">
         <div className="max-w-7xl mx-auto px-5 lg:px-8 grid lg:grid-cols-[0.8fr_1.2fr] gap-14 items-center">
           <div className="rv-scale relative justify-self-center w-full max-w-[340px] @container group">
-            <BookCover product={LATEST} />
+            <RealBookCover product={LATEST} />
             <span className="absolute top-4 -left-2 bg-wine-600 text-paper-50 text-[10px] font-bold tracking-[0.2em] uppercase px-3 py-1.5 shadow-lg rotate-[-3deg]">
               {t("badge.new", { year: LATEST.year })}
             </span>
@@ -225,9 +226,13 @@ export default function Home() {
             <SectionTitle eyebrow={t("home.worksEyebrow")}>{t("home.worksTitle")}</SectionTitle>
             <span className="rv"><ArrowLink to="/books">{t("home.worksAll")}</ArrowLink></span>
           </div>
-          <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14">
-            {BOOKS.slice(0, 6).map((b, i) => (
-              <ProductCard key={b.id} product={b} index={i} />
+          <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
+            {BOOKS.map((b, i) => (
+              <div key={b.id} className="flex justify-center">
+                <div className="w-full max-w-[320px]">
+                  <ProductCard product={b} index={i} realCover={true} compact={true} />
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -252,7 +257,7 @@ export default function Home() {
             {TRILOGY.map((b, i) => (
               <Link key={b.id} to={`/books/${b.slug}`} className="rv group block text-center" style={{ transitionDelay: `${i * 90}ms` }}>
                 <div className="@container relative mx-auto w-[78%]">
-                  <BookCover product={b} />
+                  <RealBookCover product={b} />
                 </div>
                 <h3 className="mt-5 font-display font-semibold text-xl text-paper-50 group-hover:text-gold-300 transition-colors">
                   {b.title}

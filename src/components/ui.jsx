@@ -5,6 +5,7 @@ import { formatPrice } from "../data/books";
 import { useStore } from "../context/StoreContext";
 import { useI18n } from "../i18n";
 import BookCover from "./BookCover";
+import RealBookCover from "./RealBookCover";
 import { ArrowRight, CartIcon, CheckIcon, MinusIcon, PlusIcon } from "./Icons";
 import { cn } from "../utils/cn";
 import { prefersReduced } from "../hooks/hooks";
@@ -125,9 +126,13 @@ export function AddToCart({
 }
 
 /* ---------- product card (books + oil) ---------- */
-export function ProductCard({ product, index = 0 }) {
+export function ProductCard({ product, index = 0, realCover = false, compact = false }) {
   const { addToCart } = useStore();
   const { lang, t } = useI18n();
+  
+  // Choose which cover component to use
+  const CoverComponent = realCover ? RealBookCover : BookCover;
+  
   return (
     <article className="rv group flex flex-col" style={{ transitionDelay: `${(index % 4) * 60}ms` }}>
       <Link
@@ -136,7 +141,7 @@ export function ProductCard({ product, index = 0 }) {
         aria-label={product.title}
       >
         <div className="relative">
-          <BookCover product={product} />
+          <CoverComponent product={product} />
           {product.isNew && (
             <span className="absolute top-3 -left-1 bg-wine-600 text-paper-50 text-[10px] font-bold tracking-[0.2em] uppercase px-2.5 py-1 shadow-md">
               Novedad
@@ -144,12 +149,12 @@ export function ProductCard({ product, index = 0 }) {
           )}
         </div>
       </Link>
-      <div className="mt-5 flex items-start justify-between gap-3">
+      <div className={cn("flex items-start justify-between gap-3", compact ? "mt-3" : "mt-5")}>
         <div className="min-w-0">
-          <p className="text-[11px] font-bold tracking-[0.22em] uppercase text-wine-600">
+          <p className={cn("font-bold tracking-[0.22em] uppercase text-wine-600", compact ? "text-[10px]" : "text-[11px]")}>
             {product.year} · {product.genre[lang]}
           </p>
-          <h3 className="mt-1 font-display font-semibold text-lg leading-tight text-pine-900 text-balance">
+          <h3 className={cn("font-display font-semibold leading-tight text-pine-900 text-balance", compact ? "mt-0.5 text-base" : "mt-1 text-lg")}>
             <Link
               to={product.kind === "book" ? `/books/${product.slug}` : "/olive-oil"}
               className="hover:text-wine-600 transition-colors duration-300"
@@ -157,14 +162,16 @@ export function ProductCard({ product, index = 0 }) {
               {product.title}
             </Link>
           </h3>
-          <p className="mt-1.5 text-sm text-pine-700/85 line-clamp-2">{product.blurb[lang]}</p>
+          {!compact && (
+            <p className="mt-1.5 text-sm text-pine-700/85 line-clamp-2">{product.blurb[lang]}</p>
+          )}
         </div>
       </div>
-      <div className="mt-4 pt-3 border-t border-pine-700/15 flex items-center justify-between">
-        <p className="font-display font-bold text-xl text-pine-900">
+      <div className={cn("flex items-center justify-between border-t border-pine-700/15", compact ? "mt-2 pt-2" : "mt-4 pt-3")}>
+        <p className={cn("font-display font-bold text-pine-900", compact ? "text-base" : "text-xl")}>
           {formatPrice(product.price)}
           {product.oldPrice && (
-            <span className="ml-2 text-sm font-body font-medium text-pine-700/55 line-through">
+            <span className={cn("ml-2 font-body font-medium text-pine-700/55 line-through", compact ? "text-xs" : "text-sm")}>
               {formatPrice(product.oldPrice)}
             </span>
           )}
@@ -173,9 +180,12 @@ export function ProductCard({ product, index = 0 }) {
           type="button"
           onClick={() => addToCart(product)}
           aria-label={`${t("cart.addBtn")} — ${product.title}`}
-          className="grid place-items-center w-10 h-10 rounded-full border border-pine-800/50 text-pine-800 transition-all duration-300 hover:bg-wine-600 hover:border-wine-600 hover:text-paper-50 hover:-rotate-6 active:scale-90"
+          className={cn(
+            "grid place-items-center rounded-full border border-pine-800/50 text-pine-800 transition-all duration-300 hover:bg-wine-600 hover:border-wine-600 hover:text-paper-50 hover:-rotate-6 active:scale-90",
+            compact ? "w-8 h-8" : "w-10 h-10"
+          )}
         >
-          <CartIcon className="w-4.5 h-4.5" />
+          <CartIcon className={cn(compact ? "w-3.5 h-3.5" : "w-4.5 h-4.5")} />
         </button>
       </div>
     </article>
@@ -239,7 +249,6 @@ function useCountUp(target) {
         el.textContent = String(Math.round(obj.v));
       },
     });
-    // Safety net: if the scroll trigger somehow never fires, force the final value
     const fallback = window.setTimeout(() => {
       if (!started && el) el.textContent = String(target);
     }, 2500);

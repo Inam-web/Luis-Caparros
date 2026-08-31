@@ -3,7 +3,7 @@ import { Link, Navigate, useParams } from "react-router-dom";
 import { BOOKS, TRILOGY, bySlug, externalLinks, formatPrice } from "../data/books";
 import { usePageFX, useSEO } from "../hooks/hooks";
 import { useI18n } from "../i18n";
-import BookCover from "../components/BookCover";
+import RealBookCover from "../components/RealBookCover";
 import { AddToCart, ProductCard, QtyStepper, SectionTitle } from "../components/ui";
 import { BookIcon, ChevronDown, PenNib, QuoteMark, ShieldIcon, TruckIcon } from "../components/Icons";
 
@@ -35,21 +35,23 @@ export default function BookDetail() {
   const siblings = product.trilogy ? TRILOGY.filter((b) => b.id !== product.id) : [];
   const ext = externalLinks(product);
   const related = BOOKS.filter((b) => b.id !== product.id).slice(0, 3);
+  // Add this debug line:
+  console.log("Related books:", related);
   const index = BOOKS.findIndex((b) => b.id === product.id);
 
   const chips = isOil
     ? [
-        t("book.bottle"),
-        t("book.harvest", { year: product.year }),
-        t("book.picual"),
-        t("book.cold"),
-      ]
+      t("book.bottle"),
+      t("book.harvest", { year: product.year }),
+      t("book.picual"),
+      t("book.cold"),
+    ]
     : [
-        t("book.pages", { n: product.pages ?? 0 }),
-        t("book.edition", { year: product.year }),
-        t("book.paperback"),
-        t("book.spanish"),
-      ];
+      t("book.pages", { n: product.pages ?? 0 }),
+      t("book.edition", { year: product.year }),
+      t("book.paperback"),
+      t("book.spanish"),
+    ];
 
   return (
     <>
@@ -71,8 +73,8 @@ export default function BookDetail() {
         <div className="max-w-7xl mx-auto px-5 lg:px-8 grid lg:grid-cols-[0.85fr_1.15fr] gap-12 lg:gap-20">
           {/* left: sticky cover */}
           <div className="lg:sticky lg:top-32 self-start">
-            <div className="rv-scale relative max-w-[400px] mx-auto lg:mx-0 @container group">
-              <BookCover product={product} />
+            <div className="rv-scale relative max-w-[320px] mx-auto lg:mx-0 @container group">
+              <RealBookCover product={product} />
               {product.isNew && (
                 <span className="absolute top-4 -left-2 bg-wine-600 text-paper-50 text-[10px] font-bold tracking-[0.2em] uppercase px-3 py-1.5 shadow-lg rotate-[-3deg]">
                   {t("badge.new", { year: product.year })}
@@ -249,9 +251,13 @@ export default function BookDetail() {
           <div className="flex flex-wrap items-end justify-between gap-6">
             <SectionTitle eyebrow={t("book.position", { i: index + 1, n: BOOKS.length })}>{t("book.reading")}</SectionTitle>
           </div>
-          <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14">
+          <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
             {related.map((b, i) => (
-              <ProductCard key={b.id} product={b} index={i} />
+              <div key={b.id} className="flex justify-center w-full">
+                <div className="w-full max-w-[320px]">
+                  <ProductCard product={b} index={i} realCover={true} compact={true} />
+                </div>
+              </div>
             ))}
           </div>
         </div>

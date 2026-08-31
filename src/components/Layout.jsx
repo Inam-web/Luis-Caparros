@@ -5,6 +5,7 @@ import { gsap, ScrollTrigger, prefersReduced } from "../hooks/hooks";
 import Header from "./Header";
 import Footer from "./Footer";
 import CartDrawer from "./CartDrawer";
+import LanguageDrawer from "./LanguageDrawer";
 import { ToastHost } from "./ui";
 
 const Ctx = createContext({ lenis: null, scrollToId: () => {} });
@@ -42,8 +43,6 @@ export default function Layout({ children }) {
     const lenis = lenisRef.current;
     if (lenis) lenis.scrollTo(0, { immediate: true });
     else window.scrollTo(0, 0);
-    // refresh on the next frame (after the new page has laid out), and again
-    // once fonts/images settle — prevents reveals firing against stale bounds
     requestAnimationFrame(() => ScrollTrigger.refresh());
   }, [location.pathname]);
 
@@ -77,6 +76,7 @@ export default function Layout({ children }) {
       <main className="min-h-screen">{children}</main>
       <Footer />
       <CartDrawer />
+      <LanguageDrawer />
       <ToastHost />
     </Ctx.Provider>
   );
