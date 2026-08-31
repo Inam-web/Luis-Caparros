@@ -16,9 +16,9 @@ const listeners = new Set();
 export function getLang() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw === "es" ? "es" : "en";
+    return raw === "en" ? "en" : "es"; // Spanish is default
   } catch {
-    return "en";
+    return "es";
   }
 }
 
@@ -40,7 +40,7 @@ function subscribe(fn) {
 }
 
 export function useLang() {
-  return useSyncExternalStore(subscribe, getLang, () => "en");
+  return useSyncExternalStore(subscribe, getLang, () => "es");
 }
 
 function resolve(dict, path) {
@@ -68,10 +68,10 @@ export function trArr(key, lang = getLang()) {
 
 /* ---------- React context ---------- */
 const Ctx = createContext({
-  lang: "en",
+  lang: "es", // Default to Spanish
   setLang: setLangStore,
-  t: (k, v) => tr(k, "en", v),
-  ta: (k) => trArr(k, "en"),
+  t: (k, v) => tr(k, "es", v),
+  ta: (k) => trArr(k, "es"),
 });
 
 export function LanguageProvider({ children }) {
