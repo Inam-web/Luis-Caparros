@@ -132,22 +132,35 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ============ BIOGRAPHY intro (sticky two-column) ============ */}
+            {/* ============ BIOGRAPHY intro (sticky two-column) ============ */}
       <section id="biography" className="relative py-24 lg:py-32 olive-branch-bg">
         <div className="max-w-7xl mx-auto px-5 lg:px-8 grid lg:grid-cols-[0.9fr_1.1fr] gap-14 lg:gap-20">
           <div className="lg:sticky lg:top-32 self-start">
-            <div className="rv-left relative">
-              <div className="img-reveal relative overflow-hidden">
+            <div className="rv-left relative group">
+              {/* Premium Photo Card - Matches Biography Gallery Style */}
+              <div className="relative aspect-[4/5] overflow-hidden bg-pine-100 border border-pine-800/5 shadow-sm transition-all duration-500 ease-out group-hover:shadow-xl group-hover:border-gold-400/30 group-hover:-translate-y-2">
                 <img
                   src="/images/autor.jpg"
                   alt={lang === "en" ? "Portrait of the writer Luis Caparrós in his study" : "Retrato del escritor Luis Caparrós en su estudio"}
-                  className="w-full aspect-[4/5] object-cover"
+                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   loading="lazy"
                   data-parallax="0.06"
                 />
+                
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-pine-950/80 via-pine-950/20 to-transparent opacity-60 transition-opacity duration-500 group-hover:opacity-90" />
+
+                {/* Caption Reveal Panel */}
+                <div className="absolute inset-x-0 bottom-0 p-6 translate-y-4 opacity-0 transition-all duration-500 ease-out group-hover:translate-y-0 group-hover:opacity-100">
+                  <span className="inline-block w-6 h-px bg-gold-400 mb-3 transition-all duration-500 delay-100 group-hover:w-12" />
+                  <p className="font-display font-medium text-paper-50 text-lg leading-snug">
+                    {lang === "en" ? "The Writer at Work" : "El Escritor en Su Estudio"}
+                  </p>
+                </div>
               </div>
-              <div className="absolute -top-4 -left-4 w-full h-full border-2 border-gold-500/50 -z-10" aria-hidden="true" />
-              <div className="absolute -bottom-6 -right-4 sm:-right-8 bg-pine-900 text-paper-50 px-6 py-4 shadow-xl rotate-2">
+
+              {/* Quote Badge - Lifts with the card */}
+              <div className="absolute -bottom-6 -right-4 sm:-right-8 bg-pine-900 text-paper-50 px-6 py-4 shadow-xl rotate-2 transition-all duration-500 ease-out group-hover:rotate-0 group-hover:shadow-2xl group-hover:-bottom-7 group-hover:-right-9 z-10">
                 <p className="font-display italic text-lg leading-tight">{t("home.photoQuote1")}</p>
                 <p className="font-display italic text-lg leading-tight">{t("home.photoQuote2")}</p>
               </div>
@@ -161,11 +174,30 @@ export default function Home() {
               <p className="rv">{t("home.bioP2")}</p>
               <p className="rv">{t("home.bioP3")}</p>
             </div>
+            
+            {/* Desktop-only extended content to encourage scrolling */}
+            <div className="hidden lg:block rv mt-10 pt-8 border-t border-pine-800/15">
+              <h3 className="font-display font-semibold text-xl text-pine-900 mb-4 flex items-center gap-3">
+                <FeatherIcon className="w-5 h-5 text-gold-600" />
+                {lang === "en" ? "On His Writing Process" : "Sobre Su Proceso de Escritura"}
+              </h3>
+              <p className="text-[15px] leading-relaxed text-pine-700/90 max-w-xl">
+                {lang === "en" 
+                  ? "Caparrós does not write in isolation. Each novel begins as a conversation — with elders in village squares, with forgotten letters found in attic trunks, with the silence between generations. He transcribes these voices with the patience of a rural schoolteacher, preserving dialects and cadences that standard Spanish has long erased. The result is literature that feels less like fiction and more like recovered memory."
+                  : "Caparrós no escribe en aislamiento. Cada novela comienza como una conversación: con ancianos en plazas de pueblo, con cartas olvidadas en desvanes, con el silencio entre generaciones. Transcribe estas voces con la paciencia de un maestro rural, preservando dialectos y cadencias que el español estándar ha borrado hace tiempo. El resultado es una literatura que se siente menos como ficción y más como memoria recuperada."}
+              </p>
+              <p className="mt-4 text-[15px] leading-relaxed text-pine-700/90 max-w-xl">
+                {lang === "en"
+                  ? "His manuscripts are handwritten first, always in pencil, allowing words to be reshaped like clay. Only when the rhythm feels right does he transfer them to type. This tactile approach mirrors his subject matter: stories shaped by hands, by labor, by time."
+                  : "Sus manuscritos se escriben primero a mano, siempre en lápiz, permitiendo que las palabras se remodelen como arcilla. Solo cuando el ritmo se siente correcto los pasa a máquina. Este enfoque táctil refleja su temática: historias moldeadas por manos, por trabajo, por el tiempo."}
+              </p>
+            </div>
+
             <div className="rv mt-9">
               <ArrowLink to="/biography">{t("home.bioLink")}</ArrowLink>
             </div>
 
-            {/* signature strip */}
+            {/* Signature strip */}
             <div className="rv mt-12 pt-8 border-t border-pine-800/15 grid grid-cols-2 gap-6">
               <div>
                 <p className="font-display font-bold text-2xl text-pine-900">{t("home.strip1t")}</p>
@@ -220,13 +252,43 @@ export default function Home() {
       </section>
 
       {/* ============ WORKS GRID ============ */}
+            {/* ============ WORKS GRID ============ */}
       <section className="relative py-24 lg:py-28 bg-paper-200/60 border-y border-pine-800/10">
         <div className="max-w-7xl mx-auto px-5 lg:px-8">
           <div className="flex flex-wrap items-end justify-between gap-6">
-            <SectionTitle eyebrow={t("home.worksEyebrow")}>{t("home.worksTitle")}</SectionTitle>
+            <div>
+              <SectionTitle eyebrow={t("home.worksEyebrow")}>{t("home.worksTitle")}</SectionTitle>
+              {/* Mobile-only swipe hint - fades out after 3s */}
+              <p className="lg:hidden mt-3 text-[11px] font-body font-bold tracking-[0.22em] uppercase text-pine-600/50 flex items-center gap-2 animate-swipe-hint">
+                <span className="inline-block w-3.5 h-3.5 border-r-2 border-b-2 border-pine-600/40 rotate-[-45deg]" />
+                {lang === "en" ? "Swipe to browse" : "Desliza para explorar"}
+              </p>
+            </div>
             <span className="rv"><ArrowLink to="/books">{t("home.worksAll")}</ArrowLink></span>
           </div>
-          <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
+
+          {/* MOBILE: Horizontal Swipe | DESKTOP: Standard Grid */}
+          
+          {/* Mobile swipe container */}
+          <div 
+            className="mt-10 lg:hidden -mx-5 px-5 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-6"
+            style={{ WebkitOverflowScrolling: 'touch' }}
+          >
+            <div className="flex gap-5 w-max">
+              {BOOKS.map((b, i) => (
+                <div 
+                  key={b.id} 
+                  className="rv snap-center shrink-0 w-[70vw] max-w-[300px]"
+                  style={{ transitionDelay: `${i * 80}ms` }}
+                >
+                  <ProductCard product={b} index={i} realCover={true} compact={true} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Desktop grid (unchanged) */}
+          <div className="hidden lg:grid mt-10 grid-cols-3 gap-x-6 gap-y-10">
             {BOOKS.map((b, i) => (
               <div key={b.id} className="flex justify-center">
                 <div className="w-full max-w-[320px]">

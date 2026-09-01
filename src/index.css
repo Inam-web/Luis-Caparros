@@ -228,3 +228,46 @@ select.field { cursor: pointer; }
   .cover-3d-inner { transition: none; transform: none; }
   .card-lift, .card-lift:hover { transition: none; transform: none; }
 }
+
+/* Hide scrollbar for horizontal swipe gallery on mobile */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ===== Swipe Hint Animation (Home - Works Grid) ===== */
+@keyframes swipe-hint {
+  0%, 60% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  70% {
+    opacity: 1;
+    transform: translateX(4px);
+  }
+  80% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+}
+
+.animate-swipe-hint {
+  animation: swipe-hint 3s ease-out forwards;
+}
+
+/* ===== Hide Scrollbar for Horizontal Swipe Sections ===== */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

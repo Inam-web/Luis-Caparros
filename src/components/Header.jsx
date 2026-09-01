@@ -35,12 +35,12 @@ function SearchOverlay({ open, onClose }) {
   const needle = q.trim().toLowerCase();
   const results = needle.length > 0
     ? BOOKS.filter((b) =>
-        [b.title, b.genre.en, b.genre.es, b.blurb.en, b.blurb.es,
-          ...b.tags.map((x) => x.en), ...b.tags.map((x) => x.es)]
-          .join(" ")
-          .toLowerCase()
-          .includes(needle)
-      )
+      [b.title, b.genre.en, b.genre.es, b.blurb.en, b.blurb.es,
+      ...b.tags.map((x) => x.en), ...b.tags.map((x) => x.es)]
+        .join(" ")
+        .toLowerCase()
+        .includes(needle)
+    )
     : [];
 
   const submit = (e) => {
@@ -253,7 +253,7 @@ export default function Header() {
                           >
                             <span className="font-display italic text-gold-400/80 text-sm w-4">{b.year.toString().slice(2)}</span>
                             <span className="font-body font-medium text-sm text-paper-100/90 group-hover/item:text-gold-300 transition-colors">
-                              {b.title}
+                              {lang === "en" && b.titleEn ? b.titleEn : b.title}
                             </span>
                           </Link>
                         ))}

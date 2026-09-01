@@ -26,8 +26,6 @@ export default function Store() {
   usePageFX([sort, lang]);
 
   const items = useMemo(() => {
-    // The author-brand store carries books only. The olive oil lives on its
-    // own standalone page (/olive-oil), unlinked from author pages.
     let list = [...BOOKS];
     switch (sort) {
       case "priceAsc":
@@ -72,6 +70,7 @@ export default function Store() {
       {/* toolbar + grid */}
       <section className="py-14 lg:py-18 paper-grain">
         <div className="max-w-7xl mx-auto px-5 lg:px-8">
+          {/* Sort toolbar - always accessible above both layouts */}
           <div className="flex flex-wrap items-center gap-3">
             <p className="font-display font-bold text-xl text-pine-900">{t("store.products")}</p>
             <label className="ml-auto flex items-center gap-3 text-sm text-pine-700">
@@ -93,7 +92,27 @@ export default function Store() {
             {t("store.showing", { a: items.length, b: BOOKS.length })}
           </p>
 
-          <div key={sort + lang} className="mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-8">
+          {/* MOBILE: Horizontal Swipe */}
+          <div 
+            key={`mob-${sort}-${lang}`}
+            className="mt-10 lg:hidden -mx-5 px-5 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-6"
+            style={{ WebkitOverflowScrolling: 'touch' }}
+          >
+            <div className="flex gap-4 w-max">
+              {items.map((p, i) => (
+                <div 
+                  key={p.id} 
+                  className="rv snap-center shrink-0 w-[60vw] max-w-[260px]"
+                  style={{ transitionDelay: `${i * 60}ms` }}
+                >
+                  <ProductCard product={p} index={i} realCover={true} compact={true} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* DESKTOP: Standard 4-column Grid */}
+          <div key={`desk-${sort}-${lang}`} className="hidden lg:grid mt-10 grid-cols-4 gap-x-4 gap-y-8">
             {items.map((p, i) => (
               <div key={p.id} className="flex justify-center">
                 <div className="w-full max-w-[320px]">

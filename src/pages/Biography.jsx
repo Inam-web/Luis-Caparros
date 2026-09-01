@@ -18,23 +18,56 @@ export default function Biography() {
   const milestones = trArr("bioPage.milestones", lang);
   const values = trArr("bioPage.values", lang);
 
+  // Premium gallery data - all images must be 900x1200 (3:4) .jpeg
+  const galleryImages = [
+    { src: "/images/author/author-1.jpeg", alt: "Luis Caparrós portrait in natural light", caption: lang === "en" ? "Natural Light Portrait" : "Retrato en Luz Natural" },
+    { src: "/images/author/author-2.jpeg", alt: "Writing at his study desk", caption: lang === "en" ? "The Writing Desk" : "El Escritorio de Trabajo" },
+    { src: "/images/author/author-3.jpeg", alt: "In the Andalusian olive grove", caption: lang === "en" ? "Among the Olive Trees" : "Entre los Olivos" },
+    { src: "/images/author/author-4.jpeg", alt: "Literary event appearance", caption: lang === "en" ? "Literary Presentation" : "Presentación Literaria" },
+    { src: "/images/author/author-5.jpeg", alt: "Close-up of handwritten manuscript", caption: lang === "en" ? "Original Manuscript" : "Manuscrito Original" },
+    { src: "/images/author/author-6.jpeg", alt: "Published works on wooden shelf", caption: lang === "en" ? "Published Works" : "Obras Publicadas" },
+  ];
+
   return (
     <>
-      {/* hero */}
-      <section className="relative bg-pine-950 text-paper-50 pt-40 pb-20 lg:pt-48 lg:pb-28 overflow-hidden">
+            {/* hero */}
+      <section className="relative bg-pine-950 text-paper-50 pt-28 pb-20 lg:pt-36 lg:pb-28 overflow-hidden">
         <div className="absolute inset-0 olive-branch-bg opacity-25" aria-hidden="true" />
-        <div className="relative max-w-7xl mx-auto px-5 lg:px-8 grid lg:grid-cols-[1.1fr_0.9fr] gap-12 items-end">
+        <div className="relative max-w-7xl mx-auto px-5 lg:px-8 grid lg:grid-cols-[1.1fr_0.9fr] gap-12 items-start">
           <div>
             <p className="hero-el flex items-center gap-3 font-body font-bold text-[11px] tracking-[0.34em] uppercase text-gold-400">
               <FeatherIcon className="w-4.5 h-4.5" /> {t("bioPage.eyebrow")}
             </p>
-            <h1 className="mt-5 font-display font-semibold leading-[1.0] text-[clamp(2.6rem,6.5vw,5rem)]">
+            
+            {/* Fixed 'g' clipping: Added overflow-visible to allow descenders to show */}
+            <h1 className="mt-5 font-display font-semibold leading-[1.0] text-[clamp(2.6rem,6.5vw,5rem)] overflow-visible">
               <span className="line-mask"><span>{t("bioPage.l1")}</span></span>
               <span className="line-mask"><span className="italic font-light text-gold-300">{t("bioPage.l2")}</span></span>
               <span className="line-mask"><span>{t("bioPage.l3")}</span></span>
             </h1>
+            
             <p className="hero-el mt-7 max-w-xl text-[15px] leading-relaxed text-paper-100/80">{t("bioPage.intro")}</p>
+
+            {/* UNIQUE ADDITION: Signature & Date to fill the empty space */}
+            <div className="hero-el mt-12 flex items-end gap-6 opacity-80">
+              <div className="flex flex-col">
+                <span className="font-display italic text-2xl text-gold-400/80 transform -rotate-2 origin-bottom-left">
+                  Luis Caparrós
+                </span>
+                <span className="mt-1 h-px w-16 bg-gold-400/40" />
+              </div>
+              <div className="pb-1">
+                <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-paper-100/40">
+                  {lang === "en" ? "Andalusia" : "Andalucía"}
+                </p>
+                <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-paper-100/40">
+                  Est. 1955
+                </p>
+              </div>
+            </div>
+
           </div>
+          
           <div className="hero-el relative max-w-md lg:justify-self-end w-full">
             <div className="img-reveal overflow-hidden">
               <img
@@ -94,6 +127,99 @@ export default function Biography() {
               </li>
             ))}
           </ol>
+        </div>
+      </section>
+
+      {/* PREMIUM GALLERY: Swipe on Mobile / Compact Staggered Grid on Desktop */}
+      <section className="py-24 lg:py-32 bg-paper-50 overflow-hidden">
+        <div className="max-w-6xl mx-auto px-5 lg:px-8">
+          {/* Section Header */}
+          <div className="mb-14 lg:mb-16 max-w-3xl rv">
+            <p className="font-body font-bold text-[11px] tracking-[0.34em] uppercase text-gold-600 mb-4 flex items-center gap-3">
+              <span className="w-8 h-px bg-gold-600 inline-block" />
+              {lang === "en" ? "VISUAL CHRONICLE" : "CRÓNICA VISUAL"}
+            </p>
+            <h2 className="font-display font-semibold text-pine-900 text-[clamp(1.8rem,4vw,3rem)] leading-[1.05] whitespace-pre-line">
+              {lang === "en"
+                ? "The Man Behind\nthe Manuscripts"
+                : "El Hombre Detrás\nde los Manuscritos"}
+            </h2>
+            {/* Mobile-only swipe hint */}
+            <p className="lg:hidden mt-4 text-[12px] font-body font-bold tracking-[0.2em] uppercase text-pine-600/60 flex items-center gap-2">
+              <span className="inline-block w-4 h-4 border-l-2 border-b-2 border-pine-600/40 rotate-[-45deg]" />
+              {lang === "en" ? "Swipe to explore" : "Desliza para explorar"}
+            </p>
+          </div>
+
+          {/* MOBILE: Horizontal Swipe | DESKTOP: Compact Staggered Grid */}
+          <div className="lg:grid lg:grid-cols-3 lg:gap-x-5 lg:gap-y-10">
+
+            {/* Mobile-only horizontal scroll container (unchanged) */}
+            <div
+              className="lg:hidden -mx-5 px-5 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4"
+              style={{ WebkitOverflowScrolling: 'touch' }}
+            >
+              <div className="flex gap-4 w-max">
+                {galleryImages.map((img, i) => (
+                  <div
+                    key={img.src}
+                    className="rv snap-center shrink-0 w-[75vw] max-w-[320px]"
+                    style={{ transitionDelay: `${i * 80}ms` }}
+                  >
+                    <div className="group relative aspect-[3/4] overflow-hidden bg-pine-100 border border-pine-800/5 shadow-md">
+                      <img
+                        src={img.src}
+                        alt={img.alt}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-x-0 bottom-0 p-5 bg-gradient-to-t from-pine-950/90 via-pine-950/40 to-transparent">
+                        <span className="inline-block w-6 h-px bg-gold-400 mb-2" />
+                        <p className="font-display font-medium text-paper-50 text-base leading-snug">{img.caption}</p>
+                        <p className="mt-1 text-[10px] font-body font-bold tracking-[0.2em] uppercase text-gold-300">
+                          {String(i + 1).padStart(2, "0")} / {String(galleryImages.length).padStart(2, "0")}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Desktop-only COMPACT staggered cards */}
+            {galleryImages.map((img, i) => {
+              // Reduced stagger offsets for tighter rhythm
+              const stagger = i % 3 === 1 ? "lg:mt-10" : i % 3 === 2 ? "lg:mt-20" : "";
+              return (
+                <div
+                  key={`desk-${img.src}`}
+                  className={`hidden lg:block rv group relative ${stagger}`}
+                  style={{ transitionDelay: `${i * 120}ms` }}
+                >
+                  {/* Smaller card: reduced padding, tighter caption */}
+                  <div className="relative aspect-[3/4] overflow-hidden bg-pine-100 border border-pine-800/5 shadow-sm transition-all duration-500 ease-out group-hover:shadow-lg group-hover:border-gold-400/30 group-hover:-translate-y-1.5">
+                    <img
+                      src={img.src}
+                      alt={img.alt}
+                      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+                      loading="lazy"
+                      data-parallax="0.02"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-pine-950/80 via-pine-950/20 to-transparent opacity-60 transition-opacity duration-500 group-hover:opacity-90" />
+
+                    {/* Compact caption panel */}
+                    <div className="absolute inset-x-0 bottom-0 p-4 translate-y-3 opacity-0 transition-all duration-500 ease-out group-hover:translate-y-0 group-hover:opacity-100">
+                      <span className="inline-block w-5 h-px bg-gold-400 mb-2 transition-all duration-500 delay-100 group-hover:w-10" />
+                      <p className="font-display font-medium text-paper-50 text-[15px] leading-snug">{img.caption}</p>
+                      <p className="mt-0.5 text-[10px] font-body font-bold tracking-[0.2em] uppercase text-gold-300">
+                        {String(i + 1).padStart(2, "0")} / {String(galleryImages.length).padStart(2, "0")}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </section>
 
