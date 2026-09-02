@@ -15,33 +15,42 @@ function escapeHtml(text) {
 }
 
 export default async function handler(req, res) {
-  // Only handle GET requests from Stripe redirect
+  // Only handle GET requests
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  console.log('========================================');
+  console.log('📦 ORDER CONFIRMATION STARTED');
+  console.log('📦 Query params:', req.query);
+  console.log('========================================');
+
   try {
     const { session_id } = req.query;
 
-    console.log('📦 Order confirmation received, session_id:', session_id);
+    console.log('📦 Session ID:', session_id);
 
-    // Check if session_id exists
     if (!session_id) {
+      console.log('❌ ERROR: No session_id provided');
       return res.status(400).json({ 
         success: false, 
         error: 'Missing session_id' 
       });
     }
 
-    // Retrieve session from Stripe
-    console.log('🔄 Retrieving session from Stripe...');
+    // 1. Get session from Stripe
+    console.log('🔄 Fetching session from Stripe...');
+    console.log('🔑 Using Stripe key:', process.env.STRIPE_SECRET_KEY ? '✅ Key exists' : '❌ Key missing');
+    
     const session = await stripe.checkout.sessions.retrieve(session_id, {
       expand: ['line_items', 'customer_details'],
     });
 
     console.log('✅ Session retrieved:', session.id);
+    console.log('✅ Payment status:', session.payment_status);
+    console.log('✅ Customer email:', session.customer_details?.email);
 
-    // Build order object
+    // 2. Build order
     const order = {
       number: `LC-${String(Date.now()).slice(-6)}`,
       date: new Date().toLocaleDateString('es-ES', {
@@ -59,7 +68,7 @@ export default async function handler(req, res) {
       customer: {
         name: session.metadata?.customer_name || session.customer_details?.name || 'Customer',
         surname: '',
-        email: session.customer_details?.email || session.metadata?.customer_email || '',
+        email: session.customer_details?.email || session.metadata?.customer_email || 'inamuafridi300@gmail.com',
         phone: session.metadata?.customer_phone || '',
         address: session.customer_details?.address?.line1 || '',
         city: session.customer_details?.address?.city || '',
@@ -70,14 +79,18 @@ export default async function handler(req, res) {
       payment: 'card',
     };
 
-    console.log('📧 Order object created:', order.number);
+    console.log('✅ Order created:', order.number);
+    console.log('✅ Total:', order.total);
+    console.log('✅ Customer email:', order.customer.email);
 
-    // Send confirmation email to customer
+    // 3. SEND EMAIL TO CUSTOMER
     console.log('📧 Sending customer email...');
+    console.log('📧 Using Resend key:', process.env.RESEND_API_KEY ? '✅ Key exists' : '❌ Key missing');
+    
     try {
-      const customerEmailResult = await resend.emails.send({
+      const customerEmail = await resend.emails.send({
         from: 'Luis Caparrós Website <onboarding@resend.dev>',
-        to: [order.customer.email || 'inamuafridi300@gmail.com'],
+        to: [order.customer.email],
         subject: `✅ Order Confirmation #${order.number}`,
         html: `
           <!DOCTYPE html>
@@ -127,7 +140,7 @@ export default async function handler(req, res) {
                 </div>
                 <div class="divider"></div>
                 <p style="text-align: center; color: #55705f; font-size: 13px;">
-                  You will receive a shipping confirmation once your order ships.
+                  We'll ship your order soon!
                 </p>
               </div>
               <div class="footer">
@@ -139,18 +152,19 @@ export default async function handler(req, res) {
         `,
       });
 
-      console.log('✅ Customer email sent:', customerEmailResult?.id);
+      console.log('✅ Customer email sent! ID:', customerEmail?.id);
+      console.log('✅ Sent to:', order.customer.email);
     } catch (emailError) {
-      console.error('❌ Customer email error:', emailError);
-      // Continue even if email fails
+      console.error('❌ CUSTOMER EMAIL ERROR:', emailError);
+      console.error('❌ Error details:', JSON.stringify(emailError, null, 2));
     }
 
-    // Send notification email to author
+    // 4. SEND EMAIL TO AUTHOR
     console.log('📧 Sending author email...');
     try {
-      const authorEmailResult = await resend.emails.send({
+      const authorEmail = await resend.emails.send({
         from: 'Luis Caparrós Website <onboarding@resend.dev>',
-        to: ['inamuafridi300@gmail.com'], // Change to contacto@luiscaparrosescritor.com for production
+        to: ['inamuafridi300@gmail.com'],
         subject: `📦 New Order #${order.number}`,
         html: `
           <!DOCTYPE html>
@@ -217,13 +231,17 @@ export default async function handler(req, res) {
         `,
       });
 
-      console.log('✅ Author email sent:', authorEmailResult?.id);
+      console.log('✅ Author email sent! ID:', authorEmail?.id);
+      console.log('✅ Sent to: inamuafridi300@gmail.com');
     } catch (emailError) {
-      console.error('❌ Author email error:', emailError);
-      // Continue even if email fails
+      console.error('❌ AUTHOR EMAIL ERROR:', emailError);
+      console.error('❌ Error details:', JSON.stringify(emailError, null, 2));
     }
 
-    // Return success with order data
+    console.log('========================================');
+    console.log('✅ ORDER CONFIRMATION COMPLETE');
+    console.log('========================================');
+
     return res.status(200).json({ 
       success: true, 
       order,
@@ -231,10 +249,12 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('❌ Error:', error);
+    console.error('❌ FATAL ERROR:', error);
+    console.error('❌ Error stack:', error.stack);
     return res.status(500).json({ 
       success: false, 
-      error: error.message 
+      error: error.message,
+      stack: error.stack
     });
   }
 }

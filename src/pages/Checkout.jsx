@@ -314,32 +314,30 @@ export function Confirmacion() {
   useEffect(() => {
     const confirmOrder = async () => {
       try {
-        // Get session_id from URL
         const params = new URLSearchParams(window.location.search);
         const sessionId = params.get('session_id');
 
         console.log('🔍 Session ID:', sessionId);
 
-        if (sessionId) {
-          // Call our API to confirm the order
-          const response = await fetch(`/api/order-confirmed?session_id=${sessionId}`);
-          const data = await response.json();
+        if (!sessionId) {
+          setError('No session ID found');
+          setLoading(false);
+          return;
+        }
 
-          console.log('📦 Order data:', data);
+        const response = await fetch(`/api/order-confirmed?session_id=${sessionId}`);
+        const data = await response.json();
 
-          if (data.success && data.order) {
-            setOrder(data.order);
-            setLastOrder(data.order);
-          } else {
-            setError(data.error || 'Failed to confirm order');
-          }
-        } else if (lastOrder) {
-          setOrder(lastOrder);
+        console.log('📦 Response:', data);
+
+        if (data.success && data.order) {
+          setOrder(data.order);
+          setLastOrder(data.order);
         } else {
-          setError('No order found');
+          setError(data.error || 'Failed to confirm order');
         }
       } catch (err) {
-        console.error('❌ Error confirming order:', err);
+        console.error('❌ Error:', err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -390,8 +388,14 @@ export function Confirmacion() {
           </h1>
           <p className="hero-el mt-4 text-[15px] text-pine-700 max-w-lg mx-auto">
             {lang === "en" 
-              ? `Your order #${order.number} has been confirmed. A confirmation email has been sent.`
-              : `Tu pedido #${order.number} ha sido confirmado. Se ha enviado un email de confirmación.`
+              ? `Your order #${order.number} has been confirmed.`
+              : `Tu pedido #${order.number} ha sido confirmado.`
+            }
+          </p>
+          <p className="mt-2 text-sm text-pine-500">
+            {lang === "en" 
+              ? `A confirmation email has been sent to ${order.customer?.email || 'your email'}`
+              : `Se ha enviado un email de confirmación a ${order.customer?.email || 'tu email'}`
             }
           </p>
         </div>
