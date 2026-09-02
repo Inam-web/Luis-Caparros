@@ -1,111 +1,211 @@
-import { Resend } from 'resend';
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { Resend } from "resend";
 
 export default async function handler(req, res) {
-  // ✅ Allow CORS for all origins
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  // Handle preflight OPTIONS request
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  // Only allow POST requests
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+  // Only allow POST
+  if (req.method !== "POST") {
+    return res.status(405).json({
+      success: false,
+      error: "Method not allowed",
+    });
   }
 
   try {
-    const { name, email, subject, message } = req.body;
+    // Check Resend API key
+    if (!process.env.RESEND_API_KEY) {
+      console.error("RESEND_API_KEY is missing");
 
-    // Validate required fields
-    if (!name || !email || !message) {
-      return res.status(400).json({
-        error: 'Name, email, and message are required.',
+      return res.status(500).json({
+        success: false,
+        error: "Email service is not configured.",
       });
     }
 
-    console.log('📩 Sending email from:', name, email);
+    const {
+      name,
+      email,
+      subject,
+      message,
+    } = req.body || {};
+
+    // Validate fields
+    if (!name || !email || !message) {
+      return res.status(400).json({
+        success: false,
+        error: "Name, email and message are required.",
+      });
+    }
+
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
     const { data, error } = await resend.emails.send({
-      from: 'Luis Caparrós Website <onboarding@resend.dev>',
-      to: ['contacto@luiscaparrosescritor.com'],
-      subject: `📩 New message from ${name}`,
-      reply_to: email,
+      from: "Luis Caparrós Website <onboarding@resend.dev>",
+
+      // YOUR RECEIVING EMAIL
+      to: ["inamuafridi300@gmail.com"],
+
+      subject: `New message from ${name}`,
+
+      replyTo: email,
+
       html: `
         <!DOCTYPE html>
         <html>
         <head>
-          <meta charset="utf-8">
+          <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <style>
-            body { margin: 0; padding: 0; background: #f4f0e3; font-family: Georgia, serif; }
-            .container { max-width: 700px; margin: 0 auto; background: #faf8f0; padding: 40px 50px; border: 1px solid #dcd3b8; }
-            .header { border-bottom: 3px solid #b9973f; padding-bottom: 20px; text-align: center; }
-            .header h1 { color: #16211c; font-size: 30px; margin: 0; }
-            .header p { color: #71201f; font-size: 12px; letter-spacing: 4px; text-transform: uppercase; margin: 5px 0 0; }
-            .details { background: #f4f0e3; padding: 20px 25px; border-radius: 4px; margin: 20px 0; border-left: 4px solid #b9973f; }
-            .details p { margin: 8px 0; font-size: 16px; }
-            .details strong { color: #71201f; }
-            .message-box { background: #ffffff; padding: 20px 25px; border-radius: 4px; margin: 20px 0; border-left: 4px solid #b9973f; }
-            .message-box p { font-size: 16px; line-height: 1.8; font-style: italic; margin: 0; color: #16211c; }
-            .footer { border-top: 2px solid #dcd3b8; padding-top: 20px; text-align: center; color: #55705f; font-size: 13px; }
-            .footer a { color: #b9973f; text-decoration: none; }
-          </style>
         </head>
-        <body>
-          <table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f4f0e3">
-            <tr>
-              <td align="center" style="padding: 40px 20px;">
-                <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 700px; background: #faf8f0; border: 1px solid #dcd3b8; border-radius: 6px;">
-                  <tr>
-                    <td style="padding: 40px 50px;">
-                      <div style="border-bottom: 3px solid #b9973f; padding-bottom: 20px; text-align: center;">
-                        <h1 style="color: #16211c; font-size: 30px; margin: 0;">LUIS CAPARRÓS</h1>
-                        <p style="color: #71201f; font-size: 12px; letter-spacing: 4px; text-transform: uppercase; margin: 5px 0 0;">Writer · New Message</p>
-                      </div>
-                      <p style="color: #2a3d32; font-size: 17px; line-height: 1.6; margin: 25px 0 20px 0;">
-                        You have received a new message from your website:
-                      </p>
-                      <div style="background: #f4f0e3; padding: 20px 25px; border-radius: 4px; margin: 0 0 20px 0; border-left: 4px solid #b9973f;">
-                        <p style="margin: 8px 0; font-size: 16px;"><strong style="color: #71201f;">👤 Name:</strong> ${name}</p>
-                        <p style="margin: 8px 0; font-size: 16px;"><strong style="color: #71201f;">📧 Email:</strong> <a href="mailto:${email}" style="color: #b9973f; text-decoration: none;">${email}</a></p>
-                        <p style="margin: 8px 0; font-size: 16px;"><strong style="color: #71201f;">📌 Subject:</strong> ${subject || 'No subject'}</p>
-                      </div>
-                      <div style="background: #ffffff; padding: 20px 25px; border-radius: 4px; margin: 0 0 20px 0; border-left: 4px solid #b9973f;">
-                        <p style="font-size: 16px; line-height: 1.8; font-style: italic; margin: 0; color: #16211c; word-wrap: break-word; white-space: pre-wrap;">
-                          ${message}
-                        </p>
-                      </div>
-                      <div style="border-top: 2px solid #dcd3b8; padding-top: 20px; text-align: center; color: #55705f; font-size: 13px;">
-                        <p style="margin: 0;">This email was sent from your website contact form.</p>
-                        <p style="margin: 8px 0 0 0;">
-                          <a href="mailto:${email}" style="color: #b9973f; text-decoration: none;">✉️ Reply to ${name}</a>
-                        </p>
-                      </div>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-          </table>
+
+        <body style="
+          margin:0;
+          padding:40px 20px;
+          background:#f4f0e3;
+          font-family:Georgia,serif;
+        ">
+
+          <div style="
+            max-width:700px;
+            margin:0 auto;
+            background:#faf8f0;
+            border:1px solid #dcd3b8;
+            padding:40px;
+          ">
+
+            <div style="
+              border-bottom:3px solid #b9973f;
+              padding-bottom:20px;
+              text-align:center;
+            ">
+
+              <h1 style="
+                margin:0;
+                color:#16211c;
+                font-size:30px;
+              ">
+                LUIS CAPARRÓS
+              </h1>
+
+              <p style="
+                color:#71201f;
+                font-size:12px;
+                letter-spacing:4px;
+                text-transform:uppercase;
+              ">
+                Writer · New Message
+              </p>
+
+            </div>
+
+            <p style="
+              color:#2a3d32;
+              font-size:17px;
+              line-height:1.6;
+            ">
+              You have received a new message from your website contact form.
+            </p>
+
+            <div style="
+              background:#f4f0e3;
+              padding:20px;
+              border-left:4px solid #b9973f;
+              margin-bottom:20px;
+            ">
+
+              <p>
+                <strong style="color:#71201f;">Name:</strong>
+                ${escapeHtml(name)}
+              </p>
+
+              <p>
+                <strong style="color:#71201f;">Email:</strong>
+                <a href="mailto:${escapeHtml(email)}">
+                  ${escapeHtml(email)}
+                </a>
+              </p>
+
+              <p>
+                <strong style="color:#71201f;">Subject:</strong>
+                ${escapeHtml(subject || "No subject")}
+              </p>
+
+            </div>
+
+            <div style="
+              background:#ffffff;
+              padding:20px;
+              border-left:4px solid #b9973f;
+            ">
+
+              <p style="
+                font-size:16px;
+                line-height:1.8;
+                white-space:pre-wrap;
+                color:#16211c;
+              ">
+                ${escapeHtml(message)}
+              </p>
+
+            </div>
+
+            <div style="
+              margin-top:30px;
+              padding-top:20px;
+              border-top:2px solid #dcd3b8;
+              text-align:center;
+              color:#55705f;
+              font-size:13px;
+            ">
+
+              <p>
+                This email was sent from the Luis Caparrós website.
+              </p>
+
+              <a href="mailto:${escapeHtml(email)}">
+                Reply to ${escapeHtml(name)}
+              </a>
+
+            </div>
+
+          </div>
+
         </body>
         </html>
       `,
     });
 
     if (error) {
-      console.error('❌ Resend Error:', error);
-      return res.status(500).json({ error });
+      console.error("Resend error:", error);
+
+      return res.status(500).json({
+        success: false,
+        error: error.message || "Failed to send email.",
+      });
     }
 
-    console.log('✅ Email sent successfully!');
-    res.status(200).json({ success: true, data });
+    console.log("Email sent successfully:", data?.id);
+
+    return res.status(200).json({
+      success: true,
+      message: "Email sent successfully.",
+      id: data?.id || null,
+    });
+
   } catch (error) {
-    console.error('❌ Server Error:', error);
-    res.status(500).json({ error: error.message });
+    console.error("Contact API error:", error);
+
+    return res.status(500).json({
+      success: false,
+      error: error.message || "Internal server error.",
+    });
   }
+}
+
+
+// Prevent HTML injection inside the email
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }

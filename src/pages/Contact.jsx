@@ -28,6 +28,12 @@ export default function Contact() {
 
   const subjects = ta("contact.subjects");
 
+  // Local development uses the Express server.
+  // Vercel production uses the serverless function at /api/contact.
+  const API_URL = import.meta.env.DEV
+    ? "http://localhost:5000/api/contact"
+    : "/api/contact";
+
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -134,8 +140,7 @@ export default function Contact() {
   });
 
   try {
-    // ✅ Use relative path - works on both localhost and Vercel
-    const response = await fetch('/api/contact', {
+    const response = await fetch(API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -148,9 +153,23 @@ export default function Contact() {
       }),
     });
 
+    // Read the response safely. Some server errors can return an empty body,
+    // so calling response.json() directly can cause a second JSON parse error.
+    const responseText = await response.text();
+    let result = {};
+
+    if (responseText) {
+      try {
+        result = JSON.parse(responseText);
+      } catch {
+        result = { error: responseText };
+      }
+    }
+
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Failed to send");
+      throw new Error(
+        result.error || `Request failed with status ${response.status}`
+      );
     }
 
     setStatus("sent");
