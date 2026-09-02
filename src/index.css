@@ -505,3 +505,95 @@ select.field { cursor: pointer; }
     animation: none !important;
   }
 }
+
+
+
+/* =====================================================
+   SUCCESS MODAL ANIMATIONS
+   ====================================================== */
+
+.success-ring-one {
+  animation: ringPulseOne 0.9s ease-out forwards;
+}
+.success-ring-two {
+  animation: ringPulseTwo 0.9s ease-out 0.15s forwards;
+}
+
+@keyframes ringPulseOne {
+  0%   { transform: scale(0.6); opacity: 0; }
+  100% { transform: scale(1);   opacity: 1; }
+}
+@keyframes ringPulseTwo {
+  0%   { transform: scale(0.6); opacity: 0; }
+  100% { transform: scale(1);   opacity: 1; }
+}
+
+.success-circle {
+  animation: circlePop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+@keyframes circlePop {
+  0%   { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.success-check {
+  animation: checkDraw 0.5s ease-out 0.3s forwards;
+  opacity: 0;
+}
+@keyframes checkDraw {
+  0%   { opacity: 0; transform: scale(0.5); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.success-rays {
+  animation: raysFade 0.7s ease-out 0.1s forwards;
+  opacity: 0;
+}
+@keyframes raysFade {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.success-ray {
+  position: absolute;
+  width: 2px;
+  height: 24px;
+  background: radial-gradient(ellipse at center, rgba(16, 185, 129, 0.35) 0%, transparent 70%);
+  border-radius: 1px;
+  transform-origin: center;
+  animation: rayGrow 0.6s ease-out 0.2s forwards;
+  opacity: 0;
+}
+.success-ray-top    { top: 2px;    left: 50%; transform: translateX(-50%) rotate(0deg);   }
+.success-ray-right  { right: 2px;  top: 50%;  transform: translateY(-50%) rotate(90deg);  }
+.success-ray-bottom { bottom: 2px; left: 50%; transform: translateX(-50%) rotate(180deg); }
+.success-ray-left   { left: 2px;   top: 50%;  transform: translateY(-50%) rotate(270deg); }
+.success-ray-tr     { top: 10px;   right: 10px; transform: rotate(45deg); }
+.success-ray-br     { bottom: 10px; right: 10px; transform: rotate(135deg); }
+.success-ray-bl     { bottom: 10px; left: 10px;  transform: rotate(225deg); }
+.success-ray-tl     { top: 10px;   left: 10px;   transform: rotate(315deg); }
+
+@keyframes rayGrow {
+  0%   { opacity: 0; transform: scale(0.2); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.success-progress {
+  animation: progressFill 3s linear forwards;
+}
+@keyframes progressFill {
+  0%   { width: 0%; }
+  100% { width: 100%; }
+}
+
+/* =====================================================
+   TOAST PROGRESS
+   ====================================================== */
+
+.animate-toast-progress {
+  animation: toastProgress 3s linear forwards;
+}
+@keyframes toastProgress {
+  0%   { width: 100%; }
+  100% { width: 0%; }
+}
