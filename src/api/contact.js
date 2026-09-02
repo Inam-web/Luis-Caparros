@@ -3,17 +3,26 @@ import { Resend } from 'resend';
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export default async function handler(req, res) {
-  // Only allow POST requests
+  // ✅ Allow both GET and POST
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(200).json({ 
+      message: 'This endpoint accepts POST requests. Please use POST to send messages.' 
+    });
   }
 
   try {
     const { name, email, subject, message } = req.body;
 
+    // Validate required fields
+    if (!name || !email || !message) {
+      return res.status(400).json({ 
+        error: 'Name, email, and message are required.' 
+      });
+    }
+
     const { data, error } = await resend.emails.send({
       from: 'Luis Caparrós Website <onboarding@resend.dev>',
-      to: ['inamuafridi300@gmail.com'], // Change to contacto@luiscaparrosescritor.com for production
+      to: ['inamuafridi300@gmail.com'],
       subject: `📩 New message from ${name}`,
       reply_to: email,
       html: `
@@ -83,7 +92,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ error });
     }
 
-    console.log('✅ Email sent!');
+    console.log('✅ Email sent successfully!');
     res.status(200).json({ success: true, data });
   } catch (error) {
     console.error('❌ Server Error:', error);
