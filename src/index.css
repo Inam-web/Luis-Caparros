@@ -271,3 +271,237 @@ select.field { cursor: pointer; }
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* =========================================================
+   CONTACT SUCCESS ANIMATION
+========================================================= */
+
+/* Main green circle */
+@keyframes success-circle-pop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  60% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.success-circle {
+  animation: success-circle-pop 0.65s cubic-bezier(0.34, 1.56, 0.64, 1)
+    forwards;
+}
+
+
+/* Checkmark */
+@keyframes success-check-draw {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) rotate(-15deg);
+  }
+
+  60% {
+    opacity: 1;
+    transform: scale(1.15) rotate(3deg);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+.success-check {
+  animation: success-check-draw 0.55s 0.25s
+    cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+
+/* Outer expanding ring */
+@keyframes success-ring-expand {
+  0% {
+    transform: scale(0.65);
+    opacity: 0;
+  }
+
+  40% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+}
+
+.success-ring-one {
+  animation: success-ring-expand 1.8s 0.1s ease-out infinite;
+}
+
+
+/* Second expanding ring */
+@keyframes success-ring-expand-two {
+  0% {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+
+  35% {
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: scale(1.3);
+    opacity: 0;
+  }
+}
+
+.success-ring-two {
+  animation: success-ring-expand-two 1.8s 0.35s ease-out infinite;
+}
+
+
+/* =========================================================
+   RADIATING SPIKES
+========================================================= */
+
+.success-rays {
+  animation: success-rays-appear 0.7s 0.15s ease-out both;
+}
+
+@keyframes success-rays-appear {
+  0% {
+    transform: scale(0.3) rotate(-20deg);
+    opacity: 0;
+  }
+
+  70% {
+    transform: scale(1.08) rotate(4deg);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+  }
+}
+
+
+/* Individual rays */
+.success-ray {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 3px;
+  height: 12px;
+  border-radius: 999px;
+  background: rgb(16 185 129 / 0.7);
+  transform-origin: center 64px;
+}
+
+
+/* Top */
+.success-ray-top {
+  transform: translate(-50%, -64px);
+}
+
+
+/* Right */
+.success-ray-right {
+  transform: translate(64px, -50%) rotate(90deg);
+}
+
+
+/* Bottom */
+.success-ray-bottom {
+  transform: translate(-50%, 52px);
+}
+
+
+/* Left */
+.success-ray-left {
+  transform: translate(-64px, -50%) rotate(90deg);
+}
+
+
+/* Top-right */
+.success-ray-tr {
+  transform: translate(45px, -45px) rotate(45deg);
+}
+
+
+/* Bottom-right */
+.success-ray-br {
+  transform: translate(45px, 45px) rotate(135deg);
+}
+
+
+/* Bottom-left */
+.success-ray-bl {
+  transform: translate(-45px, 45px) rotate(45deg);
+}
+
+
+/* Top-left */
+.success-ray-tl {
+  transform: translate(-45px, -45px) rotate(135deg);
+}
+
+
+/* =========================================================
+   5 SECOND PROGRESS
+========================================================= */
+
+@keyframes success-progress {
+  from {
+    width: 100%;
+  }
+
+  to {
+    width: 0%;
+  }
+}
+
+.success-progress {
+  animation: success-progress 3s linear forwards;
+}
+
+
+/* Existing error toast progress */
+@keyframes toast-progress {
+  from {
+    width: 100%;
+  }
+
+  to {
+    width: 0%;
+  }
+}
+
+.animate-toast-progress {
+  animation: toast-progress 3s linear forwards;
+}
+
+
+/* =========================================================
+   ACCESSIBILITY
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .success-circle,
+  .success-check,
+  .success-ring-one,
+  .success-ring-two,
+  .success-rays,
+  .success-progress,
+  .animate-toast-progress {
+    animation: none !important;
+  }
+}
