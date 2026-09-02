@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@stripe/react-stripe-js": "^6.8.2",
+    "@stripe/stripe-js": "^9.15.0",
     "clsx": "2.1.1",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
@@ -19,6 +21,7 @@
     "react-dom": "19.2.6",
     "react-router-dom": "^7.18.3",
     "resend": "^6.25.0",
+    "stripe": "^22.6.1",
     "tailwind-merge": "3.4.0"
   },
   "devDependencies": {
