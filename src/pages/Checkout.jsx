@@ -300,43 +300,92 @@ export function Checkout() {
 /* ================= ORDER CONFIRMATION ================= */
 export function Confirmacion() {
   const { lang, t } = useI18n();
+  const { lastOrder, setLastOrder } = useStore();
+  const [loading, setLoading] = useState(true);
+  const [order, setOrder] = useState(null);
+  
   useSEO(
     lang === "en" ? "Order confirmed - LUIS CAPARRÓS" : "Pedido confirmado - LUIS CAPARRÓS",
     lang === "en" ? "Your order has been registered. Thank you for reading." : "Tu pedido ha quedado registrado. Gracias por leer."
   );
   usePageFX([lang]);
-  const { lastOrder } = useStore();
 
-  if (!lastOrder) return <Navigate to="/store" replace />;
+  useEffect(() => {
+    // Get session_id from URL
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('session_id');
 
-  const payDef = PAYMENTS.find((p) => p.id === lastOrder.payment);
-  const payLabel = payDef ? t(payDef.labelKey) : lastOrder.payment;
+    if (sessionId) {
+      // Fetch order details from our API
+      fetch(`/api/order-confirmed?session_id=${sessionId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setOrder(data.order);
+            setLastOrder(data.order);
+          }
+          setLoading(false);
+        })
+        .catch(() => setLoading(false));
+    } else if (lastOrder) {
+      setOrder(lastOrder);
+      setLoading(false);
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="min-h-screen grid place-items-center paper-grain pt-40">
+        <div className="text-center">
+          <SpinnerIcon className="w-12 h-12 animate-spin text-gold-500 mx-auto" />
+          <p className="mt-4 text-pine-700">{lang === "en" ? "Confirming your order..." : "Confirmando tu pedido..."}</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (!order && !lastOrder) {
+    return <Navigate to="/store" replace />;
+  }
+
+  const orderData = order || lastOrder;
 
   return (
     <section className="paper-grain pt-40 pb-24 min-h-screen">
       <div className="max-w-3xl mx-auto px-5">
         <div className="text-center">
-          <div className="rv-scale mx-auto grid place-items-center w-20 h-20 rounded-full bg-pine-900 text-gold-300">
+          <div className="rv-scale mx-auto grid place-items-center w-20 h-20 rounded-full bg-emerald-600 text-white">
             <CheckIcon className="w-9 h-9" />
           </div>
-          <p className="hero-el mt-6 text-[11px] font-bold tracking-[0.3em] uppercase text-wine-600">
-            {t("checkout.badge", { number: lastOrder.number })}
+          <p className="hero-el mt-6 text-[11px] font-bold tracking-[0.3em] uppercase text-emerald-600">
+            {lang === "en" ? "Payment Successful" : "Pago Exitoso"}
           </p>
           <h1 className="mt-3 font-display font-semibold text-pine-900 text-[clamp(2rem,5vw,3.4rem)] leading-tight">
             <span className="line-mask"><span>{t("checkout.confTitle")}</span></span>
           </h1>
           <p className="hero-el mt-4 text-[15px] text-pine-700 max-w-lg mx-auto">
-            {t("checkout.confText", { date: lastOrder.date, city: lastOrder.customer.city })}
+            {lang === "en" 
+              ? `Your order #${orderData.number} has been confirmed. You will receive a confirmation email shortly.`
+              : `Tu pedido #${orderData.number} ha sido confirmado. Recibirás un email de confirmación en breve.`
+            }
+          </p>
+          <p className="mt-2 text-sm text-pine-500">
+            {lang === "en" 
+              ? `A confirmation email has been sent to ${orderData.customer?.email || 'your email'}`
+              : `Se ha enviado un email de confirmación a ${orderData.customer?.email || 'tu email'}`
+            }
           </p>
         </div>
 
         <div className="rv mt-12 bg-paper-50 border border-pine-800/15 shadow-sm">
           <div className="px-6 sm:px-8 py-5 border-b border-pine-800/12 flex flex-wrap justify-between gap-3">
             <p className="font-display font-bold text-lg text-pine-900">{t("checkout.summary")}</p>
-            <p className="text-sm text-pine-700 font-semibold">{payLabel}</p>
+            <p className="text-sm text-pine-700 font-semibold">#{orderData.number}</p>
           </div>
           <ul className="px-6 sm:px-8 py-5 divide-y divide-pine-800/10">
-            {lastOrder.lines.map((l) => (
+            {orderData.lines.map((l) => (
               <li key={l.title} className="py-3 flex justify-between gap-4 text-sm">
                 <span className="text-pine-800">
                   <strong className="font-display">{l.title}</strong>
@@ -347,24 +396,24 @@ export function Confirmacion() {
             ))}
             <li className="py-4 flex justify-between font-display font-bold text-xl text-pine-900">
               <span>{t("cart.total")}</span>
-              <span className="tabular-nums">{formatPrice(lastOrder.total)}</span>
+              <span className="tabular-nums">{formatPrice(orderData.total)}</span>
             </li>
           </ul>
           <div className="px-6 sm:px-8 py-5 bg-paper-100 border-t border-pine-800/12 grid sm:grid-cols-2 gap-4 text-sm">
             <div>
               <p className="text-[10px] font-bold tracking-[0.24em] uppercase text-pine-600">{t("checkout.shipTo")}</p>
               <p className="mt-1.5 text-pine-800 font-semibold">
-                {lastOrder.customer.name} {lastOrder.customer.surname}
+                {orderData.customer?.name} {orderData.customer?.surname}
               </p>
-              <p className="text-pine-700/85">{lastOrder.customer.address}</p>
-              <p className="text-pine-700/85">{lastOrder.customer.postcode} {lastOrder.customer.city}{lastOrder.customer.province ? `, ${lastOrder.customer.province}` : ""}</p>
+              <p className="text-pine-700/85">{orderData.customer?.address}</p>
+              <p className="text-pine-700/85">{orderData.customer?.postcode} {orderData.customer?.city}{orderData.customer?.province ? `, ${orderData.customer?.province}` : ""}</p>
             </div>
             <div>
               <p className="text-[10px] font-bold tracking-[0.24em] uppercase text-pine-600">{t("checkout.contactInfo")}</p>
-              <p className="mt-1.5 text-pine-800">{lastOrder.customer.email}</p>
-              {lastOrder.customer.phone && <p className="text-pine-700/85">{lastOrder.customer.phone}</p>}
-              {lastOrder.customer.notes && (
-                <p className="mt-2 font-display italic text-pine-700">«{lastOrder.customer.notes}»</p>
+              <p className="mt-1.5 text-pine-800">{orderData.customer?.email}</p>
+              {orderData.customer?.phone && <p className="text-pine-700/85">{orderData.customer?.phone}</p>}
+              {orderData.customer?.notes && (
+                <p className="mt-2 font-display italic text-pine-700">«{orderData.customer?.notes}»</p>
               )}
             </div>
           </div>
