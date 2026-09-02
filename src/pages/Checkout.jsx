@@ -303,6 +303,7 @@ export function Confirmacion() {
   const { lastOrder, setLastOrder } = useStore();
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState(null);
+  const [error, setError] = useState(null);
   
   useSEO(
     lang === "en" ? "Order confirmed - LUIS CAPARRÓS" : "Pedido confirmado - LUIS CAPARRÓS",
@@ -311,28 +312,41 @@ export function Confirmacion() {
   usePageFX([lang]);
 
   useEffect(() => {
-    // Get session_id from URL
-    const params = new URLSearchParams(window.location.search);
-    const sessionId = params.get('session_id');
+    const confirmOrder = async () => {
+      try {
+        // Get session_id from URL
+        const params = new URLSearchParams(window.location.search);
+        const sessionId = params.get('session_id');
 
-    if (sessionId) {
-      // Fetch order details from our API
-      fetch(`/api/order-confirmed?session_id=${sessionId}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
+        console.log('🔍 Session ID:', sessionId);
+
+        if (sessionId) {
+          // Call our API to confirm the order
+          const response = await fetch(`/api/order-confirmed?session_id=${sessionId}`);
+          const data = await response.json();
+
+          console.log('📦 Order data:', data);
+
+          if (data.success && data.order) {
             setOrder(data.order);
             setLastOrder(data.order);
+          } else {
+            setError(data.error || 'Failed to confirm order');
           }
-          setLoading(false);
-        })
-        .catch(() => setLoading(false));
-    } else if (lastOrder) {
-      setOrder(lastOrder);
-      setLoading(false);
-    } else {
-      setLoading(false);
-    }
+        } else if (lastOrder) {
+          setOrder(lastOrder);
+        } else {
+          setError('No order found');
+        }
+      } catch (err) {
+        console.error('❌ Error confirming order:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    confirmOrder();
   }, []);
 
   if (loading) {
@@ -346,11 +360,20 @@ export function Confirmacion() {
     );
   }
 
-  if (!order && !lastOrder) {
-    return <Navigate to="/store" replace />;
+  if (error || !order) {
+    return (
+      <section className="min-h-screen grid place-items-center paper-grain pt-40">
+        <div className="text-center max-w-md">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h2 className="font-display text-2xl text-pine-900">Something went wrong</h2>
+          <p className="mt-2 text-pine-700">{error || 'Order not found'}</p>
+          <Link to="/store" className="btn-primary mt-6 inline-block bg-pine-900 text-paper-50 px-6 py-3">
+            Back to Store
+          </Link>
+        </div>
+      </section>
+    );
   }
-
-  const orderData = order || lastOrder;
 
   return (
     <section className="paper-grain pt-40 pb-24 min-h-screen">
@@ -367,14 +390,8 @@ export function Confirmacion() {
           </h1>
           <p className="hero-el mt-4 text-[15px] text-pine-700 max-w-lg mx-auto">
             {lang === "en" 
-              ? `Your order #${orderData.number} has been confirmed. You will receive a confirmation email shortly.`
-              : `Tu pedido #${orderData.number} ha sido confirmado. Recibirás un email de confirmación en breve.`
-            }
-          </p>
-          <p className="mt-2 text-sm text-pine-500">
-            {lang === "en" 
-              ? `A confirmation email has been sent to ${orderData.customer?.email || 'your email'}`
-              : `Se ha enviado un email de confirmación a ${orderData.customer?.email || 'tu email'}`
+              ? `Your order #${order.number} has been confirmed. A confirmation email has been sent.`
+              : `Tu pedido #${order.number} ha sido confirmado. Se ha enviado un email de confirmación.`
             }
           </p>
         </div>
@@ -382,39 +399,34 @@ export function Confirmacion() {
         <div className="rv mt-12 bg-paper-50 border border-pine-800/15 shadow-sm">
           <div className="px-6 sm:px-8 py-5 border-b border-pine-800/12 flex flex-wrap justify-between gap-3">
             <p className="font-display font-bold text-lg text-pine-900">{t("checkout.summary")}</p>
-            <p className="text-sm text-pine-700 font-semibold">#{orderData.number}</p>
+            <p className="text-sm text-pine-700 font-semibold">#{order.number}</p>
           </div>
           <ul className="px-6 sm:px-8 py-5 divide-y divide-pine-800/10">
-            {orderData.lines.map((l) => (
-              <li key={l.title} className="py-3 flex justify-between gap-4 text-sm">
+            {order.lines && order.lines.map((l, idx) => (
+              <li key={idx} className="py-3 flex justify-between gap-4 text-sm">
                 <span className="text-pine-800">
                   <strong className="font-display">{l.title}</strong>
                   <span className="text-pine-700/60"> × {l.qty}</span>
                 </span>
-                <span className="font-semibold tabular-nums text-pine-900">{formatPrice(l.price)}</span>
+                <span className="font-semibold tabular-nums text-pine-900">{(l.price * l.qty).toFixed(2)} €</span>
               </li>
             ))}
             <li className="py-4 flex justify-between font-display font-bold text-xl text-pine-900">
               <span>{t("cart.total")}</span>
-              <span className="tabular-nums">{formatPrice(orderData.total)}</span>
+              <span className="tabular-nums">{order.total.toFixed(2)} €</span>
             </li>
           </ul>
           <div className="px-6 sm:px-8 py-5 bg-paper-100 border-t border-pine-800/12 grid sm:grid-cols-2 gap-4 text-sm">
             <div>
               <p className="text-[10px] font-bold tracking-[0.24em] uppercase text-pine-600">{t("checkout.shipTo")}</p>
               <p className="mt-1.5 text-pine-800 font-semibold">
-                {orderData.customer?.name} {orderData.customer?.surname}
+                {order.customer?.name || 'Customer'}
               </p>
-              <p className="text-pine-700/85">{orderData.customer?.address}</p>
-              <p className="text-pine-700/85">{orderData.customer?.postcode} {orderData.customer?.city}{orderData.customer?.province ? `, ${orderData.customer?.province}` : ""}</p>
+              <p className="text-pine-700/85">{order.customer?.address || 'N/A'}</p>
             </div>
             <div>
               <p className="text-[10px] font-bold tracking-[0.24em] uppercase text-pine-600">{t("checkout.contactInfo")}</p>
-              <p className="mt-1.5 text-pine-800">{orderData.customer?.email}</p>
-              {orderData.customer?.phone && <p className="text-pine-700/85">{orderData.customer?.phone}</p>}
-              {orderData.customer?.notes && (
-                <p className="mt-2 font-display italic text-pine-700">«{orderData.customer?.notes}»</p>
-              )}
+              <p className="mt-1.5 text-pine-800">{order.customer?.email || 'N/A'}</p>
             </div>
           </div>
         </div>
