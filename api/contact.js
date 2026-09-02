@@ -1,10 +1,6 @@
 import { Resend } from "resend";
 
 export default async function handler(req, res) {
-  console.log("CONTACT API CALLED");
-  console.log("METHOD:", req.method);
-
-  // Only allow POST requests
   if (req.method !== "POST") {
     return res.status(405).json({
       success: false,
@@ -13,18 +9,13 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Check Resend API key
     if (!process.env.RESEND_API_KEY) {
-      console.error("RESEND_API_KEY is missing");
-
       return res.status(500).json({
         success: false,
-        error: "Email service is not configured.",
+        error: "RESEND_API_KEY is missing.",
       });
     }
 
-    // Vercel normally gives us req.body as an object.
-    // This also handles a string body safely.
     let body = req.body;
 
     if (typeof body === "string") {
@@ -38,14 +29,8 @@ export default async function handler(req, res) {
       }
     }
 
-    const {
-      name,
-      email,
-      subject,
-      message,
-    } = body || {};
+    const { name, email, subject, message } = body || {};
 
-    // Validate required fields
     if (!name || !email || !message) {
       return res.status(400).json({
         success: false,
@@ -55,166 +40,288 @@ export default async function handler(req, res) {
 
     const resend = new Resend(process.env.RESEND_API_KEY);
 
+    const safeName = escapeHtml(name);
+    const safeEmail = escapeHtml(email);
+    const safeSubject = escapeHtml(subject || "Contact Form");
+    const safeMessage = escapeHtml(message);
+
     const { data, error } = await resend.emails.send({
       from: "Luis Caparrós Website <onboarding@resend.dev>",
+
+      // For your current testing:
       to: ["inamuafridi300@gmail.com"],
+
       subject: `New message from ${name}: ${subject || "Contact Form"}`,
+
       replyTo: email,
 
       html: `
-  <!DOCTYPE html>
-  <html>
-    <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>New Contact Form Submission</title>
-    </head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Message - Luis Caparrós</title>
+</head>
 
-    <body style="
-      margin: 0;
-      padding: 40px 20px;
-      background: #f4f4f4;
-      font-family: Arial, Helvetica, sans-serif;
-      color: #222;
-    ">
-      <div style="
-        max-width: 650px;
-        margin: 0 auto;
-        background: #ffffff;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      ">
+<body style="
+  margin:0;
+  padding:0;
+  background:#f3f0e6;
+  font-family:Arial, Helvetica, sans-serif;
+  color:#101820;
+">
 
-        <div style="
-          background: #111111;
-          padding: 28px 30px;
-          color: #ffffff;
-        ">
-          <h1 style="
-            margin: 0;
-            font-size: 24px;
-          ">
-            New Contact Form Submission
-          </h1>
+  <table
+    width="100%"
+    cellpadding="0"
+    cellspacing="0"
+    border="0"
+    style="
+      background:#f3f0e6;
+      margin:0;
+      padding:24px 0;
+    "
+  >
+    <tr>
+      <td align="center">
 
-          <p style="
-            margin: 8px 0 0;
-            color: #cccccc;
-            font-size: 14px;
-          ">
-            Luis Caparrós Website
-          </p>
-        </div>
+        <!-- MAIN CARD -->
+        <table
+          width="700"
+          cellpadding="0"
+          cellspacing="0"
+          border="0"
+          style="
+            width:700px;
+            max-width:calc(100% - 32px);
+            background:#faf8f1;
+            border:1px solid #d8ceb4;
+            border-radius:6px;
+            overflow:hidden;
+          "
+        >
 
-        <div style="padding: 30px;">
+          <!-- HEADER -->
+          <tr>
+            <td
+              align="center"
+              style="
+                padding:44px 35px 24px 35px;
+              "
+            >
 
-          <div style="margin-bottom: 22px;">
-            <p style="
-              margin: 0 0 6px;
-              font-size: 12px;
-              color: #888888;
-              text-transform: uppercase;
-              letter-spacing: 1px;
-            ">
-              Name
-            </p>
+              <div style="
+                font-size:31px;
+                line-height:1.2;
+                font-weight:700;
+                letter-spacing:-0.8px;
+                color:#071b29;
+              ">
+                LUIS CAPARRÓS
+              </div>
 
-            <p style="
-              margin: 0;
-              font-size: 16px;
-              font-weight: 600;
-            ">
-              ${escapeHtml(name)}
-            </p>
-          </div>
+              <div style="
+                margin-top:10px;
+                font-size:12px;
+                line-height:1.4;
+                letter-spacing:5px;
+                color:#9b3d3d;
+                font-weight:500;
+              ">
+                WRITER&nbsp;&nbsp;·&nbsp;&nbsp;NEW MESSAGE
+              </div>
 
-          <div style="margin-bottom: 22px;">
-            <p style="
-              margin: 0 0 6px;
-              font-size: 12px;
-              color: #888888;
-              text-transform: uppercase;
-              letter-spacing: 1px;
-            ">
-              Email
-            </p>
+            </td>
+          </tr>
 
-            <p style="
-              margin: 0;
-              font-size: 16px;
-            ">
-              ${escapeHtml(email)}
-            </p>
-          </div>
+          <!-- GOLD LINE -->
+          <tr>
+            <td style="padding:0 50px;">
+              <div style="
+                height:3px;
+                background:#b8942d;
+                width:100%;
+              "></div>
+            </td>
+          </tr>
 
-          <div style="margin-bottom: 22px;">
-            <p style="
-              margin: 0 0 6px;
-              font-size: 12px;
-              color: #888888;
-              text-transform: uppercase;
-              letter-spacing: 1px;
-            ">
-              Subject
-            </p>
+          <!-- INTRO -->
+          <tr>
+            <td
+              style="
+                padding:28px 50px 20px 50px;
+                font-size:16px;
+                line-height:1.6;
+                color:#111c25;
+              "
+            >
+              You have received a new message from your website:
+            </td>
+          </tr>
 
-            <p style="
-              margin: 0;
-              font-size: 16px;
-              font-weight: 600;
-            ">
-              ${escapeHtml(subject || "No subject")}
-            </p>
-          </div>
+          <!-- CONTACT INFORMATION -->
+          <tr>
+            <td style="padding:0 50px 20px 50px;">
 
-          <div style="
-            border-top: 1px solid #eeeeee;
-            padding-top: 24px;
-          ">
-            <p style="
-              margin: 0 0 10px;
-              font-size: 12px;
-              color: #888888;
-              text-transform: uppercase;
-              letter-spacing: 1px;
-            ">
-              Message
-            </p>
+              <table
+                width="100%"
+                cellpadding="0"
+                cellspacing="0"
+                border="0"
+                style="
+                  background:#f2eee1;
+                  border-left:4px solid #c29b31;
+                  border-radius:3px;
+                "
+              >
 
-            <div style="
-              background: #f8f8f8;
-              padding: 18px;
-              border-radius: 8px;
-              font-size: 15px;
-              line-height: 1.7;
-              white-space: pre-wrap;
-            ">
-              ${escapeHtml(message)}
-            </div>
-          </div>
+                <!-- NAME -->
+                <tr>
+                  <td
+                    style="
+                      padding:25px 25px 5px 25px;
+                      font-size:16px;
+                      line-height:1.5;
+                    "
+                  >
+                    <span style="font-size:17px;">👤</span>
+                    <strong style="color:#7d1717;">
+                      Name:
+                    </strong>
+                    <span style="color:#111c25;">
+                      ${safeName}
+                    </span>
+                  </td>
+                </tr>
 
-        </div>
+                <!-- EMAIL -->
+                <tr>
+                  <td
+                    style="
+                      padding:5px 25px;
+                      font-size:16px;
+                      line-height:1.5;
+                    "
+                  >
+                    <span style="font-size:17px;">✉️</span>
+                    <strong style="color:#7d1717;">
+                      Email:
+                    </strong>
+                    <span style="color:#b18428;">
+                      ${safeEmail}
+                    </span>
+                  </td>
+                </tr>
 
-        <div style="
-          padding: 18px 30px;
-          background: #fafafa;
-          border-top: 1px solid #eeeeee;
-          text-align: center;
-        ">
-          <p style="
-            margin: 0;
-            font-size: 12px;
-            color: #999999;
-          ">
-            Sent from the Luis Caparrós website contact form
-          </p>
-        </div>
+                <!-- SUBJECT -->
+                <tr>
+                  <td
+                    style="
+                      padding:5px 25px 25px 25px;
+                      font-size:16px;
+                      line-height:1.5;
+                    "
+                  >
+                    <span style="font-size:17px;">📌</span>
+                    <strong style="color:#7d1717;">
+                      Subject:
+                    </strong>
+                    <span style="color:#111c25;">
+                      ${safeSubject}
+                    </span>
+                  </td>
+                </tr>
 
-      </div>
-    </body>
-  </html>
-`,
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- MESSAGE -->
+          <tr>
+            <td style="padding:0 50px 20px 50px;">
+
+              <table
+                width="100%"
+                cellpadding="0"
+                cellspacing="0"
+                border="0"
+                style="
+                  background:#ffffff;
+                  border-left:4px solid #c29b31;
+                  border-radius:3px;
+                "
+              >
+                <tr>
+                  <td
+                    style="
+                      padding:48px 40px;
+                      text-align:center;
+                      font-size:16px;
+                      line-height:1.8;
+                      font-style:italic;
+                      color:#111c25;
+                      white-space:pre-wrap;
+                      word-break:break-word;
+                    "
+                  >
+                    ${safeMessage}
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- FOOTER LINE -->
+          <tr>
+            <td style="padding:0 50px;">
+              <div style="
+                height:2px;
+                background:#d9cda9;
+                width:100%;
+              "></div>
+            </td>
+          </tr>
+
+          <!-- FOOTER -->
+          <tr>
+            <td
+              align="center"
+              style="
+                padding:22px 30px 35px 30px;
+              "
+            >
+
+              <div style="
+                font-size:13px;
+                line-height:1.5;
+                color:#6e6e6e;
+              ">
+                This email was sent from your website contact form.
+              </div>
+
+              <div style="
+                margin-top:12px;
+                font-size:13px;
+                color:#b18428;
+              ">
+                ✉️ Reply to ${safeName}
+              </div>
+
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>
+      `,
     });
 
     if (error) {
@@ -226,13 +333,12 @@ export default async function handler(req, res) {
       });
     }
 
-    console.log("EMAIL SENT:", data);
-
     return res.status(200).json({
       success: true,
       message: "Email sent successfully.",
       data,
     });
+
   } catch (error) {
     console.error("CONTACT API ERROR:", error);
 
@@ -244,7 +350,7 @@ export default async function handler(req, res) {
 }
 
 
-// Prevent HTML injection in the email
+// Escape user input before putting it inside the email HTML
 function escapeHtml(value) {
   return String(value)
     .replace(/&/g, "&amp;")
