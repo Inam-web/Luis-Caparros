@@ -3,11 +3,19 @@ import { Resend } from 'resend';
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export default async function handler(req, res) {
-  // ✅ Allow both GET and POST
+  // ✅ Allow CORS for all origins
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  // Handle preflight OPTIONS request
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  // Only allow POST requests
   if (req.method !== 'POST') {
-    return res.status(200).json({ 
-      message: 'This endpoint accepts POST requests. Please use POST to send messages.' 
-    });
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
@@ -15,14 +23,16 @@ export default async function handler(req, res) {
 
     // Validate required fields
     if (!name || !email || !message) {
-      return res.status(400).json({ 
-        error: 'Name, email, and message are required.' 
+      return res.status(400).json({
+        error: 'Name, email, and message are required.',
       });
     }
 
+    console.log('📩 Sending email from:', name, email);
+
     const { data, error } = await resend.emails.send({
       from: 'Luis Caparrós Website <onboarding@resend.dev>',
-      to: ['inamuafridi300@gmail.com'],
+      to: ['contacto@luiscaparrosescritor.com'],
       subject: `📩 New message from ${name}`,
       reply_to: email,
       html: `

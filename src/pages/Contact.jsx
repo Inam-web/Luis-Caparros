@@ -118,62 +118,61 @@ export default function Contact() {
   };
 
   const submit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const er = validate();
-    setErrors(er);
-    if (Object.keys(er).length > 0) {
-      return;
-    }
+  const er = validate();
+  setErrors(er);
+  if (Object.keys(er).length > 0) {
+    return;
+  }
 
-    setStatus("sending");
-    setToast({
-      visible: false,
-      type: "",
-      message: "",
+  setStatus("sending");
+  setToast({
+    visible: false,
+    type: "",
+    message: "",
+  });
+
+  try {
+    // ✅ Use relative path - works on both localhost and Vercel
+    const response = await fetch('/api/contact', {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        subject: form.subject || subjects[0] || "",
+        message: form.message.trim(),
+      }),
     });
 
-    try {
-      // ✅ WORKS ON BOTH LOCALHOST AND VERCEL
-      // Localhost: Vite proxy forwards to localhost:5000
-      // Vercel: Serverless function handles /api/contact
-      const response = await fetch('/api/contact', {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: form.name.trim(),
-          email: form.email.trim(),
-          subject: form.subject || subjects[0] || "",
-          message: form.message.trim(),
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to send");
-      }
-
-      setStatus("sent");
-      setErrors({});
-      setShowSuccess(true);
-      setForm({
-        name: "",
-        email: "",
-        subject: "",
-        message: "",
-        privacy: false,
-      });
-    } catch (error) {
-      console.error("Contact form error:", error);
-      setStatus("error");
-      showErrorToast(
-        lang === "en"
-          ? "Something went wrong. Please try again or email us directly."
-          : "Algo salió mal. Por favor, inténtalo de nuevo o escríbenos directamente."
-      );
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to send");
     }
-  };
+
+    setStatus("sent");
+    setErrors({});
+    setShowSuccess(true);
+    setForm({
+      name: "",
+      email: "",
+      subject: "",
+      message: "",
+      privacy: false,
+    });
+  } catch (error) {
+    console.error("Contact form error:", error);
+    setStatus("error");
+    showErrorToast(
+      lang === "en"
+        ? "Something went wrong. Please try again or email us directly."
+        : "Algo salió mal. Por favor, inténtalo de nuevo o escríbenos directamente."
+    );
+  }
+};
 
   const handleReset = () => {
     setForm({
