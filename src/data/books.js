@@ -102,7 +102,7 @@ export const BOOKS = [
     year: 2016,
     genre: { en: "Novel", es: "Novela" },
     pages: 268,
-    price: 4.99,
+    price: 14.99,
     cover: {
       bg: "linear-gradient(165deg,#173a45 0%,#0f2b35 55%,#0a1d24 100%)",
       accent: "#7fb7a8",
