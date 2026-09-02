@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { loadStripe } from '@stripe/stripe-js';
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import { loadStripe } from '@stripe/stripe-js';
 import { formatPrice } from "../data/books";
 import { useStore } from "../context/StoreContext";
 import { usePageFX, useSEO } from "../hooks/hooks";
@@ -295,5 +294,97 @@ export function Checkout() {
         </div>
       </section>
     </>
+  );
+}
+
+/* ================= ORDER CONFIRMATION ================= */
+export function Confirmacion() {
+  const { lang, t } = useI18n();
+  useSEO(
+    lang === "en" ? "Order confirmed - LUIS CAPARRÓS" : "Pedido confirmado - LUIS CAPARRÓS",
+    lang === "en" ? "Your order has been registered. Thank you for reading." : "Tu pedido ha quedado registrado. Gracias por leer."
+  );
+  usePageFX([lang]);
+  const { lastOrder } = useStore();
+
+  if (!lastOrder) return <Navigate to="/store" replace />;
+
+  const payDef = PAYMENTS.find((p) => p.id === lastOrder.payment);
+  const payLabel = payDef ? t(payDef.labelKey) : lastOrder.payment;
+
+  return (
+    <section className="paper-grain pt-40 pb-24 min-h-screen">
+      <div className="max-w-3xl mx-auto px-5">
+        <div className="text-center">
+          <div className="rv-scale mx-auto grid place-items-center w-20 h-20 rounded-full bg-pine-900 text-gold-300">
+            <CheckIcon className="w-9 h-9" />
+          </div>
+          <p className="hero-el mt-6 text-[11px] font-bold tracking-[0.3em] uppercase text-wine-600">
+            {t("checkout.badge", { number: lastOrder.number })}
+          </p>
+          <h1 className="mt-3 font-display font-semibold text-pine-900 text-[clamp(2rem,5vw,3.4rem)] leading-tight">
+            <span className="line-mask"><span>{t("checkout.confTitle")}</span></span>
+          </h1>
+          <p className="hero-el mt-4 text-[15px] text-pine-700 max-w-lg mx-auto">
+            {t("checkout.confText", { date: lastOrder.date, city: lastOrder.customer.city })}
+          </p>
+        </div>
+
+        <div className="rv mt-12 bg-paper-50 border border-pine-800/15 shadow-sm">
+          <div className="px-6 sm:px-8 py-5 border-b border-pine-800/12 flex flex-wrap justify-between gap-3">
+            <p className="font-display font-bold text-lg text-pine-900">{t("checkout.summary")}</p>
+            <p className="text-sm text-pine-700 font-semibold">{payLabel}</p>
+          </div>
+          <ul className="px-6 sm:px-8 py-5 divide-y divide-pine-800/10">
+            {lastOrder.lines.map((l) => (
+              <li key={l.title} className="py-3 flex justify-between gap-4 text-sm">
+                <span className="text-pine-800">
+                  <strong className="font-display">{l.title}</strong>
+                  <span className="text-pine-700/60"> × {l.qty}</span>
+                </span>
+                <span className="font-semibold tabular-nums text-pine-900">{formatPrice(l.price)}</span>
+              </li>
+            ))}
+            <li className="py-4 flex justify-between font-display font-bold text-xl text-pine-900">
+              <span>{t("cart.total")}</span>
+              <span className="tabular-nums">{formatPrice(lastOrder.total)}</span>
+            </li>
+          </ul>
+          <div className="px-6 sm:px-8 py-5 bg-paper-100 border-t border-pine-800/12 grid sm:grid-cols-2 gap-4 text-sm">
+            <div>
+              <p className="text-[10px] font-bold tracking-[0.24em] uppercase text-pine-600">{t("checkout.shipTo")}</p>
+              <p className="mt-1.5 text-pine-800 font-semibold">
+                {lastOrder.customer.name} {lastOrder.customer.surname}
+              </p>
+              <p className="text-pine-700/85">{lastOrder.customer.address}</p>
+              <p className="text-pine-700/85">{lastOrder.customer.postcode} {lastOrder.customer.city}{lastOrder.customer.province ? `, ${lastOrder.customer.province}` : ""}</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-bold tracking-[0.24em] uppercase text-pine-600">{t("checkout.contactInfo")}</p>
+              <p className="mt-1.5 text-pine-800">{lastOrder.customer.email}</p>
+              {lastOrder.customer.phone && <p className="text-pine-700/85">{lastOrder.customer.phone}</p>}
+              {lastOrder.customer.notes && (
+                <p className="mt-2 font-display italic text-pine-700">«{lastOrder.customer.notes}»</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="rv mt-10 flex flex-wrap justify-center gap-4">
+          <Link
+            to="/store"
+            className="btn-primary inline-flex items-center gap-3 bg-pine-900 text-paper-50 border border-pine-900 font-body font-bold text-[12.5px] tracking-[0.16em] uppercase px-7 py-4"
+          >
+            {t("checkout.backStore")}
+          </Link>
+          <Link
+            to="/"
+            className="link-ink font-body font-bold text-[12.5px] tracking-[0.16em] uppercase text-pine-800 py-4"
+          >
+            {t("checkout.goHome")}
+          </Link>
+        </div>
+      </div>
+    </section>
   );
 }
