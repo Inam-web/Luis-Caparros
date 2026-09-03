@@ -34,7 +34,7 @@ export default function Home() {
   return (
     <>
       {/* ============ HERO ============ */}
-      <section className="relative min-h-[100svh] flex items-end lg:items-center overflow-hidden paper-grain">
+      <section className="relative min-h-[calc(100svh-56px)] lg:min-h-[100svh] flex items-start lg:items-center overflow-hidden paper-grain">
         {/* right photo band */}
         <div className="absolute inset-y-0 right-0 w-full lg:w-[46%]">
           <div className="img-reveal absolute inset-0">
@@ -50,7 +50,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-t from-paper-100 via-transparent to-paper-100/40" />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-5 lg:px-8 w-full pt-40 pb-16 lg:pt-36 lg:pb-24 grid lg:grid-cols-[1.15fr_0.85fr] gap-14 items-center">
+        <div className="relative max-w-7xl mx-auto px-5 lg:px-8 w-full pt-28 pb-20 lg:pt-36 lg:pb-24 grid lg:grid-cols-[1.15fr_0.85fr] gap-14 items-center">
           {/* left: words */}
           <div>
             <p className="hero-el flex items-center gap-3 font-body font-bold text-[11px] sm:text-xs tracking-[0.34em] uppercase text-wine-600">
