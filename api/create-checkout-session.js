@@ -36,24 +36,36 @@ export default async function handler(req, res) {
       });
     }
 
+    // ✅ THIS IS WHERE THE SUCCESS_URL IS DEFINED
+    const origin = req.headers.origin || 'https://luis-caparros.vercel.app';
+    const successUrl = `${origin}/order-confirmed?session_id={CHECKOUT_SESSION_ID}`;
+    const cancelUrl = `${origin}/checkout`;
+
+    console.log('✅ Origin:', origin);
+    console.log('✅ Success URL:', successUrl);
+
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      success_url: `${req.headers.origin}/order-confirmed?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.origin}/checkout`,
+      success_url: successUrl,  // ← THIS IS WHERE IT'S USED
+      cancel_url: cancelUrl,    // ← THIS IS WHERE IT'S USED
       customer_email: customer.email,
       metadata: {
         customer_name: customer.name,
         customer_phone: customer.phone || '',
         customer_notes: customer.notes || '',
+        customer_email: customer.email,
       },
     });
 
+    console.log('✅ Session created:', session.id);
+    console.log('✅ Session URL:', session.url);
+
     res.status(200).json({ sessionId: session.id, url: session.url });
   } catch (error) {
-    console.error('Stripe Error:', error);
+    console.error('❌ Stripe Error:', error);
     res.status(500).json({ error: error.message });
   }
 }
