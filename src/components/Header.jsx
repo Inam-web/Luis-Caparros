@@ -190,12 +190,26 @@ export default function Header() {
           <div className="max-w-7xl mx-auto px-5 lg:px-8 h-9 flex items-center justify-between text-[11px] font-medium tracking-[0.14em] uppercase">
             <p className="hidden sm:block">{t("topbar.shipping")}</p>
             <p className="sm:hidden">{t("topbar.short")}</p>
-            <div className="flex items-center gap-4">
-              <a href={AUTHOR.instagram} target="_blank" rel="noreferrer" className="hover:text-gold-300 transition-colors flex items-center gap-1.5">
-                <InstagramIcon className="w-3.5 h-3.5" /> luis.caparrosmiron
+            
+            {/* ✅ SOCIAL ICONS - Clean mini social bar */}
+            <div className="flex items-center gap-1 sm:gap-2">
+              <a
+                href="https://www.instagram.com/caparrosmiron/"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Instagram"
+                className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full text-paper-100/50 hover:text-[#E4405F] hover:bg-white/10 transition-all duration-300"
+              >
+                <InstagramIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </a>
-              <a href={AUTHOR.facebook} target="_blank" rel="noreferrer" className="hover:text-gold-300 transition-colors hidden md:flex items-center gap-1.5">
-                <FacebookIcon className="w-3.5 h-3.5" /> caparrosmiron
+              <a
+                href="https://www.facebook.com/luis.caparrosmiron/"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Facebook"
+                className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full text-paper-100/50 hover:text-[#1877F2] hover:bg-white/10 transition-all duration-300"
+              >
+                <FacebookIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </a>
             </div>
           </div>
@@ -388,10 +402,10 @@ export default function Header() {
 
           <div data-menu-item className="mt-8 flex items-center justify-between">
             <div className="flex gap-3">
-              <a href={AUTHOR.instagram} target="_blank" rel="noreferrer" aria-label="Instagram" className="grid place-items-center w-11 h-11 border border-paper-100/25 text-paper-100 rounded-full hover:bg-gold-500 hover:text-pine-950 hover:border-gold-500 transition-all duration-300">
+              <a href="https://www.instagram.com/caparrosmiron/" target="_blank" rel="noreferrer" aria-label="Instagram" className="grid place-items-center w-11 h-11 border border-paper-100/25 text-paper-100 rounded-full hover:bg-[#E4405F] hover:text-pine-950 hover:border-[#E4405F] transition-all duration-300">
                 <InstagramIcon className="w-5 h-5" />
               </a>
-              <a href={AUTHOR.facebook} target="_blank" rel="noreferrer" aria-label="Facebook" className="grid place-items-center w-11 h-11 border border-paper-100/25 text-paper-100 rounded-full hover:bg-gold-500 hover:text-pine-950 hover:border-gold-500 transition-all duration-300">
+              <a href="https://www.facebook.com/luis.caparrosmiron/" target="_blank" rel="noreferrer" aria-label="Facebook" className="grid place-items-center w-11 h-11 border border-paper-100/25 text-paper-100 rounded-full hover:bg-[#1877F2] hover:text-pine-950 hover:border-[#1877F2] transition-all duration-300">
                 <FacebookIcon className="w-5 h-5" />
               </a>
             </div>
