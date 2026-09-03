@@ -8,34 +8,29 @@ function clean(value, maxLength = 500) {
     .slice(0, maxLength);
 }
 
-function getOrderNumber(sessionId) {
-  const cleanId = String(sessionId)
-    .replace(/[^a-zA-Z0-9]/g, "")
-    .toUpperCase();
-
-  return `LC-${cleanId.slice(-8)}`;
-}
-
-function formatDate(timestamp) {
-  return new Date(timestamp * 1000).toLocaleDateString(
-    "es-ES",
-    {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    }
-  );
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
 }
 
 export default async function handler(req, res) {
-  if (req.method !== "GET") {
+  // -------------------------------------------------------
+  // METHOD CHECK
+  // -------------------------------------------------------
+
+  if (req.method !== "POST") {
     return res.status(405).json({
       success: false,
       error: "Method not allowed.",
     });
   }
 
+  // -------------------------------------------------------
+  // STRIPE CONFIGURATION CHECK
+  // -------------------------------------------------------
+
   if (!process.env.STRIPE_SECRET_KEY) {
+    console.error("❌ STRIPE_SECRET_KEY is missing.");
+
     return res.status(500).json({
       success: false,
       error: "Stripe is not configured.",
@@ -43,143 +38,240 @@ export default async function handler(req, res) {
   }
 
   try {
-    const sessionId = clean(
-      req.query?.session_id,
-      200
-    );
+    // -------------------------------------------------------
+    // READ REQUEST BODY
+    // -------------------------------------------------------
 
-    if (!sessionId) {
+    const { items, shipping, customer } = req.body || {};
+
+    // -------------------------------------------------------
+    // BASIC VALIDATION
+    // -------------------------------------------------------
+
+    if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({
         success: false,
-        error: "Missing session_id.",
+        error: "Your cart is empty.",
       });
     }
 
-    /* -------------------------------------------------------
-       Retrieve Stripe session
-       ------------------------------------------------------- */
-
-    const session =
-      await stripe.checkout.sessions.retrieve(
-        sessionId,
-        {
-          expand: ["line_items"],
-        }
-      );
-
-    /* -------------------------------------------------------
-       Payment check
-       ------------------------------------------------------- */
-
-    if (session.payment_status !== "paid") {
+    if (!customer || typeof customer !== "object") {
       return res.status(400).json({
         success: false,
-        error:
-          "This order has not been paid successfully.",
+        error: "Customer information is required.",
       });
     }
 
-    const metadata = session.metadata || {};
+    // -------------------------------------------------------
+    // CUSTOMER DATA
+    // -------------------------------------------------------
 
-    const stripeCustomer =
-      session.customer_details || {};
+    const name = clean(customer.name, 200);
+    const email = clean(customer.email, 320);
+    const phone = clean(customer.phone, 50);
+    const address = clean(customer.address, 300);
+    const city = clean(customer.city, 100);
+    const province = clean(customer.province, 100);
+    const postcode = clean(customer.postcode, 20);
+    const notes = clean(customer.notes, 1000);
 
-    /* -------------------------------------------------------
-       Build order for confirmation page
-       ------------------------------------------------------- */
+    if (!name) {
+      return res.status(400).json({
+        success: false,
+        error: "Name is required.",
+      });
+    }
 
-    const lines =
-      session.line_items?.data?.map((item) => {
-        const quantity = item.quantity || 1;
+    if (!email || !isValidEmail(email)) {
+      return res.status(400).json({
+        success: false,
+        error: "Please provide a valid email address.",
+      });
+    }
 
-        const total =
-          (item.amount_total || 0) / 100;
+    if (!address) {
+      return res.status(400).json({
+        success: false,
+        error: "Address is required.",
+      });
+    }
 
-        return {
-          title:
-            item.description || "Book",
+    if (!city) {
+      return res.status(400).json({
+        success: false,
+        error: "City is required.",
+      });
+    }
 
-          qty: quantity,
+    if (!postcode) {
+      return res.status(400).json({
+        success: false,
+        error: "Postcode is required.",
+      });
+    }
 
-          total,
+    // -------------------------------------------------------
+    // SHIPPING
+    // -------------------------------------------------------
 
-          price:
-            total / quantity,
-        };
-      }) || [];
+    const shippingAmount = Number(shipping) || 0;
 
-    const order = {
-      number: getOrderNumber(session.id),
+    if (!Number.isFinite(shippingAmount) || shippingAmount < 0) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid shipping amount.",
+      });
+    }
 
-      date: formatDate(session.created),
+    // -------------------------------------------------------
+    // BUILD STRIPE LINE ITEMS
+    // -------------------------------------------------------
 
-      lines,
+    const lineItems = [];
 
-      total:
-        (session.amount_total || 0) / 100,
+    for (const item of items) {
+      const title = clean(item?.title, 200);
 
-      customer: {
-        name:
-          metadata.customer_name ||
-          stripeCustomer.name ||
-          "Customer",
+      const price = Number(item?.price);
+      const quantity = Number(item?.qty);
 
-        email:
-          metadata.customer_email ||
-          stripeCustomer.email ||
-          "",
+      if (!title) {
+        return res.status(400).json({
+          success: false,
+          error: "A product is missing its title.",
+        });
+      }
 
-        phone:
-          metadata.customer_phone ||
-          stripeCustomer.phone ||
-          "",
+      if (!Number.isFinite(price) || price < 0) {
+        return res.status(400).json({
+          success: false,
+          error: `Invalid price for "${title}".`,
+        });
+      }
 
-        address:
-          metadata.customer_address ||
-          "",
+      if (
+        !Number.isInteger(quantity) ||
+        quantity < 1 ||
+        quantity > 100
+      ) {
+        return res.status(400).json({
+          success: false,
+          error: `Invalid quantity for "${title}".`,
+        });
+      }
 
-        city:
-          metadata.customer_city ||
-          "",
+      lineItems.push({
+        price_data: {
+          currency: "eur",
 
-        province:
-          metadata.customer_province ||
-          "",
+          product_data: {
+            name: title,
+          },
 
-        postcode:
-          metadata.customer_postcode ||
-          "",
+          unit_amount: Math.round(price * 100),
+        },
 
-        notes:
-          metadata.customer_notes ||
-          "",
+        quantity,
+      });
+    }
+
+    // -------------------------------------------------------
+    // ADD SHIPPING AS A LINE ITEM
+    // -------------------------------------------------------
+
+    if (shippingAmount > 0) {
+      lineItems.push({
+        price_data: {
+          currency: "eur",
+
+          product_data: {
+            name: "Shipping",
+          },
+
+          unit_amount: Math.round(shippingAmount * 100),
+        },
+
+        quantity: 1,
+      });
+    }
+
+    // -------------------------------------------------------
+    // FRONTEND URL
+    //
+    // IMPORTANT:
+    // This project uses React HashRouter.
+    // Therefore Stripe MUST redirect to /#/order-confirmed
+    // instead of /order-confirmed.
+    // -------------------------------------------------------
+
+    const origin =
+      process.env.FRONTEND_URL ||
+      req.headers.origin ||
+      "https://luis-caparros.vercel.app";
+
+    // Remove trailing slash to prevent // in URLs.
+    const frontendUrl = origin.replace(/\/+$/, "");
+
+    // -------------------------------------------------------
+    // CREATE STRIPE CHECKOUT SESSION
+    // -------------------------------------------------------
+
+    console.log("📦 Creating Stripe checkout session...");
+    console.log("Customer:", email);
+    console.log("Items:", items.length);
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+
+      line_items: lineItems,
+
+      mode: "payment",
+
+      // IMPORTANT:
+      // HashRouter requires /#/order-confirmed
+      success_url: `${frontendUrl}/#/order-confirmed?session_id={CHECKOUT_SESSION_ID}`,
+
+      // IMPORTANT:
+      // HashRouter requires /#/checkout
+      cancel_url: `${frontendUrl}/#/checkout`,
+
+      customer_email: email,
+
+      metadata: {
+        customer_name: name,
+        customer_email: email,
+        customer_phone: phone,
+        customer_address: address,
+        customer_city: city,
+        customer_province: province,
+        customer_postcode: postcode,
+        customer_notes: notes,
       },
+    });
 
-      payment: "card",
-    };
+    // -------------------------------------------------------
+    // SUCCESS
+    // -------------------------------------------------------
 
-    /* -------------------------------------------------------
-       IMPORTANT:
-       No Resend call here.
-
-       The Stripe webhook is responsible for emails.
-       ------------------------------------------------------- */
+    console.log("✅ Stripe session created:", session.id);
 
     return res.status(200).json({
       success: true,
-      order,
+      sessionId: session.id,
+      url: session.url,
     });
   } catch (error) {
-    console.error(
-      "❌ Order confirmation error:",
-      error
-    );
+    // -------------------------------------------------------
+    // ERROR HANDLING
+    // -------------------------------------------------------
+
+    console.error("❌ Stripe checkout error:", error);
 
     return res.status(500).json({
       success: false,
       error:
         error?.message ||
-        "Unable to retrieve order confirmation.",
+        "Unable to create Stripe checkout session.",
     });
   }
 }
