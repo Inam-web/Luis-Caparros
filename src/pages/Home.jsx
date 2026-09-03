@@ -140,7 +140,7 @@ export default function Home() {
               {/* Premium Photo Card - Matches Biography Gallery Style */}
               <div className="relative aspect-[4/5] overflow-hidden bg-pine-100 border border-pine-800/5 shadow-sm transition-all duration-500 ease-out group-hover:shadow-xl group-hover:border-gold-400/30 group-hover:-translate-y-2">
                 <img
-                  src="/images/autor.jpg"
+                  src="/images/autor.jpeg"
                   alt={lang === "en" ? "Portrait of the writer Luis Caparrós in his study" : "Retrato del escritor Luis Caparrós en su estudio"}
                   className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   loading="lazy"

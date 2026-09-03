@@ -71,7 +71,7 @@ export default function Biography() {
           <div className="hero-el relative max-w-md lg:justify-self-end w-full">
             <div className="img-reveal overflow-hidden">
               <img
-                src="/images/autor.jpg"
+                src="/images/autor.jpeg"
                 alt={lang === "en" ? "Luis Caparrós writing by the window of his study" : "Luis Caparrós escribiendo junto a la ventana de su estudio"}
                 className="w-full aspect-[4/5] object-cover"
                 data-parallax="0.05"
