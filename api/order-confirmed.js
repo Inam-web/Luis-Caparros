@@ -22,26 +22,29 @@ export default async function handler(req, res) {
 
   console.log('========================================');
   console.log('📦 ORDER CONFIRMATION STARTED');
+  console.log('📦 Full URL:', req.url);
   console.log('📦 Query params:', req.query);
+  console.log('📦 Session ID from query:', req.query.session_id);
   console.log('========================================');
 
   try {
+    // ✅ Get session_id from query params
     const { session_id } = req.query;
 
-    console.log('📦 Session ID:', session_id);
+    console.log('📦 Session ID extracted:', session_id);
 
     if (!session_id) {
       console.log('❌ ERROR: No session_id provided');
+      console.log('❌ Available query params:', Object.keys(req.query));
       return res.status(400).json({ 
         success: false, 
-        error: 'Missing session_id' 
+        error: 'Missing session_id',
+        query: req.query,
       });
     }
 
     // 1. Get session from Stripe
     console.log('🔄 Fetching session from Stripe...');
-    console.log('🔑 Using Stripe key:', process.env.STRIPE_SECRET_KEY ? '✅ Key exists' : '❌ Key missing');
-    
     const session = await stripe.checkout.sessions.retrieve(session_id, {
       expand: ['line_items', 'customer_details'],
     });
@@ -85,8 +88,6 @@ export default async function handler(req, res) {
 
     // 3. SEND EMAIL TO CUSTOMER
     console.log('📧 Sending customer email...');
-    console.log('📧 Using Resend key:', process.env.RESEND_API_KEY ? '✅ Key exists' : '❌ Key missing');
-    
     try {
       const customerEmail = await resend.emails.send({
         from: 'Luis Caparrós Website <onboarding@resend.dev>',
@@ -156,7 +157,6 @@ export default async function handler(req, res) {
       console.log('✅ Sent to:', order.customer.email);
     } catch (emailError) {
       console.error('❌ CUSTOMER EMAIL ERROR:', emailError);
-      console.error('❌ Error details:', JSON.stringify(emailError, null, 2));
     }
 
     // 4. SEND EMAIL TO AUTHOR
@@ -232,10 +232,8 @@ export default async function handler(req, res) {
       });
 
       console.log('✅ Author email sent! ID:', authorEmail?.id);
-      console.log('✅ Sent to: inamuafridi300@gmail.com');
     } catch (emailError) {
       console.error('❌ AUTHOR EMAIL ERROR:', emailError);
-      console.error('❌ Error details:', JSON.stringify(emailError, null, 2));
     }
 
     console.log('========================================');
@@ -250,11 +248,9 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('❌ FATAL ERROR:', error);
-    console.error('❌ Error stack:', error.stack);
     return res.status(500).json({ 
       success: false, 
-      error: error.message,
-      stack: error.stack
+      error: error.message 
     });
   }
 }
