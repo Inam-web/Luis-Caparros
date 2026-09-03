@@ -227,7 +227,7 @@ export default function BookDetail() {
             {/* author info */}
             <div className="rv mt-10 flex items-start gap-5 bg-paper-50 border border-pine-800/15 p-6">
               <img
-                src="/images/autor.jpg"
+                src="/images/autor.jpeg"
                 alt="Luis Caparrós"
                 className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover shrink-0 border-2 border-gold-500/60"
                 loading="lazy"
